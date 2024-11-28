@@ -1,0 +1,88 @@
+﻿@using CourseManagement.Constants
+@using CourseManagement.ViewModels
+@{
+    ViewData["Title"] = "Đăng Nhập";
+    Layout = "~/Views/Shared/_SmallLayout.cshtml";
+}
+@model LoginViewModel
+
+<div class="login-box">
+    <!-- /.login-logo -->
+    <div class="card card-outline card-primary">
+        <div class="card-header text-center">
+            <a class="h4"><b>Đăng nhập hệ thống</b></a>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("Login", WebConstants.CONTROLLER_INDEX, FormMethod.Post, new { id = "frmLogin", enctype = "multipart/form-data" }))
+            {
+                <span asp-validation-for="LoginMessage" class="error-message"></span>
+                <div class="input-group mb-2">
+                    @Html.TextBoxFor(model => model.UserName, new { @class = "form-control", @autocomplete = "off", @placeholder = "Tên đăng nhập/Email" })
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-envelope"></span>
+                        </div>
+                    </div>
+                </div>
+                <span asp-validation-for="UserName" class="error-message"></span>
+                <div class="input-group mb-2">
+                    @Html.TextBoxFor(model => model.Password, new { @class = "form-control", @type = "password", @autocomplete = "off", @placeholder = "Mật khẩu" })
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <span asp-validation-for="Password" class="error-message"></span>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="icheck-primary">
+                            @Html.CheckBoxFor(model => model.IsRemember, new { @class = "form-control", @type = "checkbox" })
+                            @Html.LabelFor(model => model.IsRemember, "Nhớ mật khẩu")
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="custom-control custom-switch" onclick="showPassword()">
+                                <input type="checkbox" class="custom-control-input" id="cbShowPassword">
+                                <label class="custom-control-label" for="cbShowPassword">Hiện mật khẩu</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <a asp-action="Register">Đăng ký thành viên</a>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+                        @Html.HiddenFor(model => model.ReturnUrl)
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        // Show password
+        function showPassword() {
+            var password = document.querySelector("#Password");
+            var showPasswordCheckbox = document.querySelector("#cbShowPassword");
+
+            if (password) {
+                if (showPasswordCheckbox.checked) {
+                    password.type = "text";
+                    confirmPassword.type = "text";
+                } else {
+                    password.type = "password";
+                    confirmPassword.type = "password";
+                }
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        avoidFormResubmission();
+    </script>
+}
