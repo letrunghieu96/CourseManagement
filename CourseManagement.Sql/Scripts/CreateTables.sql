@@ -9,10 +9,9 @@ GO
 
 CREATE TABLE [dbo].[Users] (
     [UserId] [int] IDENTITY (1, 1) NOT NULL,
-    [UserName] [nvarchar] (50) NOT NULL UNIQUE,
-    [PasswordHash] [varchar] (255) NOT NULL DEFAULT (''),
     [FullName] [nvarchar] (100) NOT NULL DEFAULT (N''),
-    [Email] [varchar] (255) NOT NULL DEFAULT (''),
+    [Email] [varchar] (255) NOT NULL UNIQUE,
+    [PasswordHash] [varchar] (255) NOT NULL DEFAULT (''),
     [Role] [varchar] (20) NOT NULL DEFAULT (''),
     [IsActive] [bit] NOT NULL DEFAULT (1),
     [CreatedAt] [datetime] NOT NULL DEFAULT (GETDATE()),
@@ -67,6 +66,6 @@ GO
 ALTER TABLE [dbo].[Courses] WITH NOCHECK ADD
     CONSTRAINT [FK_Courses_Users] FOREIGN KEY
     (
-        [UserId]
+        [CreatedBy]
     ) REFERENCES [dbo].[Users] ([UserId])
 GO

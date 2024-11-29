@@ -1,10 +1,14 @@
-﻿using CourseManagement.Sql.Queries;
+﻿using CourseManagement.Domain.Users.Helpers;
+using CourseManagement.Sql.Queries;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace CourseManagement.Domain.Users
 {
+    /// <summary>
+    /// Users repository
+    /// </summary>
     internal class UsersRepository : RepositoryBase, IUsersRepository
     {
         public UsersRepository(SqlConnection sqlConnection, IDbTransaction dbTransaction)
@@ -12,15 +16,18 @@ namespace CourseManagement.Domain.Users
         {
         }
 
-        public int Count(object parameters)
+        public int Count(SearchCondition condition)
         {
             try
             {
-                var count = _dbConnection.ExecuteScalar<int>(
-                    "spUsers_Count",
-                    parameters,
-                    transaction: _dbTransaction,
-                    commandType: CommandType.StoredProcedure);
+                // Parameters
+                var parameters = new DynamicParameters();
+                parameters.Add("SearchWord", condition.SearchWord ?? string.Empty, DbType.String, size: 100);
+                parameters.Add("IsActive", condition.IsActive, DbType.Int16);
+                parameters.Add("Role", condition.Role ?? string.Empty, DbType.String, size: 20);
+
+                // Count
+                var count = _dbConnection.ExecuteScalar<int>(UsersQuery.Count, parameters, transaction: _dbTransaction);
                 return count;
             }
             catch
@@ -30,32 +37,39 @@ namespace CourseManagement.Domain.Users
             return 0;
         }
 
-        public IEnumerable<UserModel> Search(object parameters)
-        {
-            try
-            {
-                var results = _dbConnection.Query<UserModel>(
-                    "spUsers_Search",
-                    parameters,
-                    transaction: _dbTransaction,
-                    commandType: CommandType.StoredProcedure);
-                return results;
-            }
-            catch
-            {
-            }
-
-            return Enumerable.Empty<UserModel>();
-        }
-
-
-        public UserModel CheckLogin(string userName, string passwordHash)
+        public SearchResult[] Search(SearchCondition condition)
         {
             try
             {
                 // Parameters
                 var parameters = new DynamicParameters();
-                parameters.Add("UserName", userName, DbType.String, size: 255);
+                parameters.Add("SearchWord", condition.SearchWord ?? string.Empty, DbType.String, size: 100);
+                parameters.Add("IsActive", condition.IsActive, DbType.Int16);
+                parameters.Add("Role", condition.Role ?? string.Empty, DbType.String, size: 20);
+                parameters.Add("BeginRowNum", condition.BeginRowNum, DbType.Int32);
+                parameters.Add("RowsOfPage", condition.PageLength, DbType.Int32);
+                var orderBy = Enum.TryParse(condition.OrderBy, out UserSortByEnum sortBy) ? (int)sortBy : 0;
+                parameters.Add("OrderBy", orderBy, DbType.String, size: 2);
+
+                // Search
+                var results = _dbConnection.Query<SearchResult>(UsersQuery.Search, parameters, transaction: _dbTransaction);
+                return results.ToArray();
+            }
+            catch
+            {
+            }
+
+            return new SearchResult[0];
+        }
+
+
+        public UserModel CheckLogin(string email, string passwordHash)
+        {
+            try
+            {
+                // Parameters
+                var parameters = new DynamicParameters();
+                parameters.Add("Email", email, DbType.String, size: 255);
                 parameters.Add("PasswordHash", passwordHash, DbType.String, size: 255);
 
                 var model = _dbConnection.QuerySingleOrDefault<UserModel>(UsersQuery.CheckLogin, parameters, transaction: _dbTransaction);
@@ -80,26 +94,6 @@ namespace CourseManagement.Domain.Users
             }
 
             return null;
-        }
-
-        public bool IsExistUserName(int userId, string userName)
-        {
-            try
-            {
-                // Parameters
-                var parameters = new DynamicParameters();
-                parameters.Add("UserId", userId, DbType.Int32);
-                parameters.Add("UserName", userName, DbType.String, size: 255);
-
-                // Check
-                var count = _dbConnection.QueryFirstOrDefault<int>(UsersQuery.CheckExistUserName, parameters, transaction: _dbTransaction);
-                return (count > 0);
-            }
-            catch
-            {
-            }
-
-            return false;
         }
 
         public bool IsExistEmail(int userId, string email)
@@ -129,10 +123,9 @@ namespace CourseManagement.Domain.Users
             {
                 // Parameters
                 var parameters = new DynamicParameters();
-                parameters.Add("UserName", model.UserName, DbType.String, size: 50);
-                parameters.Add("PasswordHash", model.PasswordHash, DbType.String, size: 255);
                 parameters.Add("FullName", model.FullName, DbType.String, size: 100);
                 parameters.Add("Email", model.Email, DbType.String, size: 255);
+                parameters.Add("PasswordHash", model.PasswordHash, DbType.String, size: 255);
                 parameters.Add("Role", model.Role, DbType.String, size: 20);
                 parameters.Add("IsActive", model.IsActive, DbType.Int16);
                 parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
@@ -155,7 +148,6 @@ namespace CourseManagement.Domain.Users
                 // Parameters
                 var parameters = new DynamicParameters();
                 parameters.Add("UserId", userId, DbType.Int32);
-                parameters.Add("UserName", model.UserName, DbType.String, size: 50);
                 parameters.Add("FullName", model.FullName, DbType.String, size: 100);
                 parameters.Add("Email", model.Email, DbType.String, size: 255);
                 parameters.Add("Role", model.Role, DbType.String, size: 20);

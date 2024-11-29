@@ -1,0 +1,133 @@
+﻿@{
+    ViewData["Title"] = "Đăng ký thành viên";
+    Layout = "~/Views/Shared/_SmallLayout.cshtml";
+}
+@using CourseManagement.Constants
+@using CourseManagement.ViewModels.Users
+@model UserViewModel
+
+<div class="register-box">
+    <div class="card card-outline card-primary">
+        <div class="card-header text-center">
+            <a class="h4"><b>Đăng ký thành viên mới</b></a>
+        </div>
+        <div class="card-body">
+            <form id="frmRegister">
+                <span asp-validation-for="MessageRegister" class="error-message"></span>
+                <div id="dvFullName" class="input-group mb-1">
+                    <input type="text" asp-for="FullName" class="form-control" autocomplete="off" placeholder="Họ tên">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-user"></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvEmail" class="input-group mb-1">
+                    <input asp-for="Email" type="email" autocomplete="off" placeholder="Email" class="form-control" />
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-envelope"></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvPassword" class="input-group mb-1">
+                    <input asp-for="Password" type="password" autocomplete="off" class="form-control" placeholder="Mật khẩu">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvConfirmPassword" class="input-group mb-1">
+                    <input asp-for="ConfirmPassword" type="password" autocomplete="off" class="form-control" placeholder="Nhập lại mật khẩu">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6"></div>
+                    <div class="col-md-6">
+                        <div class="form-group text-right mb-2">
+                            <div class="custom-control custom-switch" onclick="showPassword()">
+                                <input type="checkbox" class="custom-control-input" id="cbShowPassword">
+                                <label class="custom-control-label" for="cbShowPassword">Hiện mật khẩu</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-12 text-rigth">
+                        <button type="button" onclick="create()" class="btn btn-primary btn-block">Đăng ký</button>
+                    </div>
+                </div>
+            </form>
+            <a asp-action="Index" asp-controller="Index" class="text-center">Đã là thành viên</a>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        // Show password
+        function showPassword() {
+            var password = document.querySelector("#Password");
+            var confirmPassword = document.querySelector("#ConfirmPassword");
+            var showPasswordCheckbox = document.querySelector("#cbShowPassword");
+
+            if (password) {
+                if (showPasswordCheckbox.checked) {
+                    password.type = "text";
+                    confirmPassword.type = "text";
+                } else {
+                    password.type = "password";
+                    confirmPassword.type = "password";
+                }
+            }
+        }
+
+        function create() {
+            var input = $("#frmRegister").serialize();
+            $.ajax({
+                type: "POST",
+                url: "/Create",
+                data: input,
+                success: function (response) {
+                    if ((response.isSuccess === false)
+                        && (response.errors != null)
+                        && (response.errors.length > 0)) {
+
+                        // Clear
+                        clearError();
+
+                        // Set error
+                        for (var index = 0; index < response.errors.length; index++) {
+                            setError(response.errors[index].key, response.errors[index].value);
+                        }
+
+                        return;
+                    }
+
+                    $(document).Toasts('create', {
+                        class: response.isSuccess ? 'bg-info' : 'bg-danger',
+                        title: 'Thông báo',
+                        subtitle: '',
+                        body: response.message
+                    });
+
+                    if (response.isSuccess) {
+                        setTimeout(function () { location.reload(); }, 3000);
+                    }
+                },
+                error: function (xhr, exception) {
+                    // Handle other types of errors
+                    alert(xhr.responseText);
+                }
+            });
+        }
+    </script>
+    <script type="text/javascript">
+        avoidFormResubmission();
+    </script>
+}

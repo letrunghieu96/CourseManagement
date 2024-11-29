@@ -1,4 +1,5 @@
 ﻿using CourseManagement.Domain.Extensions;
+using CourseManagement.Middlewares;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -43,6 +44,16 @@ public class Startup
             return connection.BeginTransaction(IsolationLevel.ReadCommitted);
         });
         services.RegisterServices();
+
+        // Add distributed memory cache
+        services.AddDistributedMemoryCache();
+        services.AddSession(option =>
+        {
+            option.Cookie.Name = "CourseManagement.AspNetCore.Session";
+            option.IdleTimeout = TimeSpan.FromMinutes(_configuration.GetValue<int>("WebTimeOut"));
+            option.Cookie.HttpOnly = true;
+            option.Cookie.IsEssential = true;
+        });
     }
     #endregion
 
@@ -69,6 +80,12 @@ public class Startup
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseCors(cors => cors.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+        app.UseSession();
+
+        // Middleware
+        app.UseMiddleware<SessionTimeoutMiddleware>();
 
         app.UseEndpoints(endpoints =>
         {

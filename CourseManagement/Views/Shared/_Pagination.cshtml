@@ -1,0 +1,36 @@
+﻿@using CourseManagement.Constants
+@using CourseManagement.ViewModels
+@using Newtonsoft.Json;
+@{
+    var pagination = JsonConvert.DeserializeObject<PaginationViewModel>(TempData.Peek("paging")?.ToString() ?? string.Empty);
+}
+
+<style>
+    .items-number > label {
+        font-weight: normal !important;
+        text-align: left;
+        white-space: nowrap;
+    }
+    .items-number > label > select {
+        width: auto;
+        display: inline-block;
+    }
+</style>
+
+@if ((pagination != null) && (pagination.Total > 0))
+{
+    <div class="col-md-6">
+        <div class="items-number">
+            <label>
+                @Html.DropDownListFor(
+                    model => pagination.PageLength,
+                    new SelectList(ConfigConstants.PAGE_LENGTHS),
+                    new { @id="ddlPageLength", @class="custom-select custom-select-sm form-control form-control-sm", @onchange = "changePageLength()" })
+                @($"Hiển thị từ {pagination.BeginRowNum} đến {pagination.RowsOfPage} của {pagination.Total.ToString("#,###")} kết quả")
+            </label>
+        </div>
+    </div>
+    <div class="col-md-6">
+        @Html.Raw(pagination.PagesHtml)
+    </div>
+}

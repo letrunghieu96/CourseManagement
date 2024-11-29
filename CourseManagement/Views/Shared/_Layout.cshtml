@@ -47,10 +47,10 @@
                 <div class="sidebar">
                     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                         <div class="info">
-                            <a class="d-block">@Context.Session.GetString("FullName")</a>
+                        <a class="d-block">@Context.Session.GetString("UserFullName")</a>
                             <a class="d-block">
                                 <span class="badge badge-success">
-                                    @Context.Session.GetString("RoleText")
+                                    @Context.Session.GetString("UserRoleText")
                                 </span>
                             </a>
                         </div>
@@ -86,6 +86,16 @@
     <script src="../../plugins/jquery-ui/jquery-ui.min.js"></script>
     <script src="../../js/site.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
     <script src="../../js/unobtrusive-ajax.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script type="text/javascript">
+        $(function () {
+            // Select 2
+            $('.select2').select2();
 
+            // Date picker
+            $('.date').datetimepicker({
+                format: 'DD/MM/YYYY'
+            });
+        });
+    </script>
     @RenderSection("scripts", required: false)
 </html>

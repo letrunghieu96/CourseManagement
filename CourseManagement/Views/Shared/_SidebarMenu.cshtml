@@ -1,0 +1,24 @@
+﻿@using CourseManagement.Constants
+@{
+    var currentPage = Convert.ToString(ViewContext.HttpContext.Request.Path)!;
+}
+<nav class="mt-2" id="menu-item-list">
+    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <li class="nav-item">
+            <a href="@WebConstants.PAGE_DASHBOARDS_LIST" class="nav-link @((currentPage == WebConstants.PAGE_DASHBOARDS_LIST) ? "active": string.Empty)">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>Dashboard</p>
+            </a>
+        </li>
+        @if (User.IsInRole(WebConstants.CONST_ROLE_ADMIN))
+        {
+            <li class="nav-header">QUẢN LÝ NGƯỜI DÙNG</li>
+            <li class="nav-item">
+                <a href="@WebConstants.PAGE_USERS_LIST" class="nav-link @((currentPage == WebConstants.PAGE_USERS_LIST) ? "active": string.Empty)">
+                    <i class="nav-icon fas fa-users"></i>
+                    <p>Người dùng</p>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>

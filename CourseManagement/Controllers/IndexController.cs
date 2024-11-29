@@ -1,17 +1,21 @@
 ﻿using CourseManagement.Constants;
 using CourseManagement.Domain;
+using CourseManagement.Helpers;
 using CourseManagement.Services;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Users;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CourseManagement.Controllers
 {
     public class IndexController : ControllerBase<IndexController>
     {
         private readonly int _timeoutForCookieRememberPassword;
-        private const string _cookieEmployeeCode = "InventoryManagementUserName";
-        private const string _cookiePassword = "InventoryManagementPassword";
+        private const string _cookieEmail = "CourseManagement.Email";
+        private const string _cookiePassword = "CourseManagement.Password";
 
         public IndexController(IConfiguration config, IDomainFacade domainFacade)
             : base(config, domainFacade)
@@ -25,10 +29,10 @@ namespace CourseManagement.Controllers
             var viewModel = new LoginViewModel { ReturnUrl = returnUrl, };
 
             // Is remember
-            if (!string.IsNullOrEmpty(Request.Cookies[_cookieEmployeeCode])
+            if (!string.IsNullOrEmpty(Request.Cookies[_cookieEmail])
                && !string.IsNullOrEmpty(Request.Cookies[_cookiePassword]))
             {
-                viewModel.UserName = Request.Cookies[_cookieEmployeeCode] ?? string.Empty;
+                viewModel.Email = Request.Cookies[_cookieEmail] ?? string.Empty;
                 viewModel.Password = Request.Cookies[_cookiePassword] ?? string.Empty;
                 viewModel.IsRemember = true;
             }
@@ -36,6 +40,44 @@ namespace CourseManagement.Controllers
             return View(WebConstants.VIEW_INDEX, viewModel);
         }
 
+        [HttpPost]
+        public IActionResult Login(LoginViewModel viewModel)
+        {
+            // Invalid input
+            if (!ModelState.IsValid) return View(WebConstants.VIEW_INDEX, viewModel);
+
+            // Remember sign in information
+            if (viewModel.IsRemember)
+            {
+                CookiesHelper.Set(HttpContext.Response.Cookies, _cookieEmail, viewModel.Email, _timeoutForCookieRememberPassword);
+                CookiesHelper.Set(HttpContext.Response.Cookies, _cookiePassword, viewModel.Password, _timeoutForCookieRememberPassword);
+            }
+            else
+            {
+                CookiesHelper.Remove(HttpContext.Response.Cookies, _cookieEmail);
+                CookiesHelper.Remove(HttpContext.Response.Cookies, _cookiePassword);
+            }
+
+            var userLogin = this.Service.Login(viewModel.Email, viewModel.Password);
+            if (userLogin == null)
+            {
+                ModelState.AddModelError("LoginMessage", $"{ErrorMessageHelper.LoggedInFailed}\r\n{ErrorMessageHelper.WrongLoginInfo}");
+                return View(WebConstants.VIEW_INDEX, viewModel);
+            }
+
+            // Save info
+            SessionHelper.SetObjectAsJson(HttpContext.Session, "UserLogin", userLogin);
+            HttpContext.Session.SetString("UserFullName", this.UserFullName);
+            HttpContext.Session.SetString("UserRoleText", ValueTextHelper.GetRoleText(this.UserRole));
+
+            // Set role
+            var authClaims = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            authClaims.AddClaim(new Claim(ClaimTypes.Role, this.UserRole));
+            authClaims.AddClaim(new Claim(ClaimTypes.Name, this.UserFullName));
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(authClaims));
+
+            return LocalRedirect(WebConstants.PAGE_USERS_LIST);
+        }
 
         [HttpGet("/Register")]
         public IActionResult Register()
@@ -43,17 +85,27 @@ namespace CourseManagement.Controllers
             return View(WebConstants.VIEW_REGISTER, new UserViewModel());
         }
 
-        [HttpPost("/Register")]
-        public IActionResult Save(UserViewModel viewModel)
+        [HttpPost("/Create")]
+        public IActionResult Create(UserViewModel viewModel)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
+
+            // Check exist
+            if (this.Service.IsExistEmail(0, viewModel.Email)) ModelState.AddModelError("Email", string.Format(ErrorMessageHelper.ExistError, "Email"));
+            if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
+
+            // Create
+            var isSuccess = this.Service.Create(viewModel);
+            if (isSuccess) _domainFacade.Commit();
+
+            // Result
+            var jsonResult = new JsonResultViewModel
             {
-                var isSuccess = this.Service.Insert(viewModel);
-            }
-
-            return View(WebConstants.VIEW_REGISTER, viewModel);
+                IsSuccess = isSuccess,
+                Message = isSuccess ? ErrorMessageHelper.RegistrationSuccessfully : ErrorMessageHelper.RegistrationFailed,
+            };
+            return Json(jsonResult);
         }
-
 
         #region +Properties
         /// <summary>Index work service</summary>

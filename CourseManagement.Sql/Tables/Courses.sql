@@ -37,6 +37,6 @@ GO
 ALTER TABLE [dbo].[Courses] WITH NOCHECK ADD
     CONSTRAINT [FK_Courses_Users] FOREIGN KEY
     (
-        [UserId]
+        [CreatedBy]
     ) REFERENCES [dbo].[Users] ([UserId])
 GO

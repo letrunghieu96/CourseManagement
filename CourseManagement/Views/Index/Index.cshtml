@@ -7,7 +7,6 @@
 @model LoginViewModel
 
 <div class="login-box">
-    <!-- /.login-logo -->
     <div class="card card-outline card-primary">
         <div class="card-header text-center">
             <a class="h4"><b>Đăng nhập hệ thống</b></a>
@@ -17,14 +16,14 @@
             {
                 <span asp-validation-for="LoginMessage" class="error-message"></span>
                 <div class="input-group mb-2">
-                    @Html.TextBoxFor(model => model.UserName, new { @class = "form-control", @autocomplete = "off", @placeholder = "Tên đăng nhập/Email" })
+                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @autocomplete = "off", @placeholder = "Email" })
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-envelope"></span>
                         </div>
                     </div>
                 </div>
-                <span asp-validation-for="UserName" class="error-message"></span>
+                <span asp-validation-for="Email" class="error-message"></span>
                 <div class="input-group mb-2">
                     @Html.TextBoxFor(model => model.Password, new { @class = "form-control", @type = "password", @autocomplete = "off", @placeholder = "Mật khẩu" })
                     <div class="input-group-append">
@@ -42,7 +41,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-group">
+                        <div class="form-group mt-1">
                             <div class="custom-control custom-switch" onclick="showPassword()">
                                 <input type="checkbox" class="custom-control-input" id="cbShowPassword">
                                 <label class="custom-control-label" for="cbShowPassword">Hiện mật khẩu</label>
@@ -51,8 +50,10 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
-                        <a asp-action="Register">Đăng ký thành viên</a>
+                    <div class="col-md-6 mt-2">
+                        <a href="Register" class="btn-link">
+                            <i>Đăng ký thành viên ?</i>
+                        </a>
                     </div>
                     <div class="col-md-6">
                         <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
@@ -74,10 +75,8 @@
             if (password) {
                 if (showPasswordCheckbox.checked) {
                     password.type = "text";
-                    confirmPassword.type = "text";
                 } else {
                     password.type = "password";
-                    confirmPassword.type = "password";
                 }
             }
         }

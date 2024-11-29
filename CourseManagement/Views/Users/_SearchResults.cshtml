@@ -1,0 +1,33 @@
+﻿@using CourseManagement.Constants
+@using CourseManagement.Domain.Users.Helpers
+@using CourseManagement.Helpers
+@model SearchResult[]
+
+@if (Model.Length > 0) foreach (var result in Model)
+{
+    <tr>
+        <td>@result.FullName</td>
+        <td>@result.Email</td>
+        <td>@ValueTextHelper.GetRoleText(result.Role)</td>
+        <td>
+            <span class="badge badge-@((result.IsActive == 1) ? "primary" : "warning")">
+                @ValueTextHelper.GetActivityText(result.IsActive.ToString())
+            </span>
+        </td>
+        <td>@result.CreatedAt.ToString(WebConstants.DATE_TIME_FORMAT_VN)</td>
+        <td class="text-center">
+            <a onclick="register(@result.UserId)" class="btn btn-info btn-sm">
+                <i class="fas fa-eye"></i>
+            </a>
+            <button class="btn btn-danger btn-sm" onclick="deleteUser(@result.UserId, '@result.FullName')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+}
+else
+{
+    <tr>
+        <td class="error-message" colspan="6">@ErrorMessageHelper.NoDataFound</td>
+    </tr>
+}

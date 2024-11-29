@@ -8,8 +8,10 @@ namespace CourseManagement.ViewModels
     public class LoginViewModel
     {
         #region +Properties
-        [Required(ErrorMessage = "Tên đăng nhập là trường bắt buộc")]
-        public string UserName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Email là trường bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email sai định dạng")]
+        [StringLength(255, ErrorMessage = "Email có chiều dài tối đa 255 kí tự")]
+        public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Mật khẩu là trường bắt buộc")]
         [DataType(DataType.Password)]

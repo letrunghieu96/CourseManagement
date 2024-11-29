@@ -1,22 +1,65 @@
-html {
-  font-size: 14px;
+﻿.select2-container--default .select2-selection--single {
+    height: calc(2.25rem + 2px) !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    margin-top: 4px !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: rgba(255,255,255,.7) !important;
+}
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #80bdff !important;
+}
+#back-to-top {
+    bottom: 0.5rem;
+    height: 38px;
+    width: 40px;
+    right: 0.75rem;
+    border-radius: 1.25rem !important;
+}
+.btn-group, .btn-primary {
+    border-radius: 0.25rem !important;
+}
+.btn-link {
+    text-decoration: underline !important;
+}
+.table-sort-desc:after {
+    content: "↓";
+    right: 0.5em;
+    border: 8px solid transparent;
+    color: #009a67;
+}
+.table-sort-asc:after {
+    content: "↑";
+    right: 1em;
+    border: 8px solid transparent;
+    color: #009a67;
+}
+.table thead th {
+    background: #f9f9f9;
+}
+.necessary {
+    color: red;
+}
+.error-message {
+    color: red !important;
+    text-align: center !important;
+    font-weight: 600 !important;
+}
+.invalid-feedback {
+    font-size: inherit;
+}
+.required::after {
+    content: "*";
+    position: relative;
+    font-size: inherit;
+    color: red;
+    padding-left: 0.25rem;
+    font-weight: inherit;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
+.max-w-600px {
+    width: 600px !important;
+    max-width: 600px !important;
 }

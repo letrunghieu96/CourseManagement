@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Người dùng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using CourseManagement.Constants
+@using CourseManagement.ViewModels.Users
+@model UserListViewModel
+
+<!-- Page header -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h1 class="text-bold">Quản lý Người dùng</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        <div class="card-header pl-2">
+            @{
+                await Html.RenderPartialAsync(WebConstants.PARTIAL_VIEW_USERS_SEARCH_CONDITION, Model.Condition);
+            }
+        </div>
+        <div class="card-header pl-2">
+            <h5 class="title">Danh sách Người dùng</h5>
+        </div>
+        <div class="card-body pt-2">
+            <div class="table-responsive mb-2">
+                <table class="table table-bordered table-hover" id="tblUsers">
+                    <thead>
+                        <tr>
+                            <th class="table-sort" data-sort-by="FullName">Họ tên</th>
+                            <th class="table-sort" data-sort-by="Email">Email</th>
+                            <th class="table-sort" data-sort-by="Role">Vai trò</th>
+                            <th class="table-sort" data-sort-by="IsActive">Trạng thái</th>
+                            <th class="table-sort" data-sort-by="CreatedAt">Ngày tạo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @await Html.PartialAsync(WebConstants.PARTIAL_VIEW_USERS_SEARCH_RESULTS, Model.Results)
+                    </tbody>
+                </table>
+            </div>
+            <div class="row" id="dvPagination">
+                @await Html.PartialAsync(WebConstants.PARTIAL_VIEW_PAGINATION)
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal input form -->
+<div class="modal fade" id="modalInputForm" role="dialog">
+</div>
+
+<!-- Modal change password form -->
+@await Html.PartialAsync(WebConstants.PARTIAL_VIEW_USERS_CHANGE_PASSWORD, new ChangePasswordViewModel())
+
+@section scripts {
+    <!-- JS -->
+    <script src="../../js/search.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script src="../../js/users.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script>
+        avoidFormResubmission();
+    </script>
+}
