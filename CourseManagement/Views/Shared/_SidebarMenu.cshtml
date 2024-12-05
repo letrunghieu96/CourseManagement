@@ -5,14 +5,36 @@
 <nav class="mt-2" id="menu-item-list">
     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
-            <a href="@WebConstants.PAGE_DASHBOARDS_LIST" class="nav-link @((currentPage == WebConstants.PAGE_DASHBOARDS_LIST) ? "active": string.Empty)">
-                <i class="nav-icon fas fa-tachometer-alt"></i>
-                <p>Dashboard</p>
+            <a href="@WebConstants.PAGE_HOME" class="nav-link @((currentPage == WebConstants.PAGE_HOME) ? "active": string.Empty)">
+                <i class="nav-icon fas fa-home"></i>
+                <p>Trang chủ</p>
             </a>
+        </li>
+        <li class="nav-item sub-menu @(((currentPage == WebConstants.PAGE_COURSES_LIST) || currentPage.StartsWith(WebConstants.PAGE_COURSES_REGISTER)) ? "menu-is-opening menu-open" : string.Empty)">
+            <a href="#" class="nav-link submenu-item @(((currentPage == WebConstants.PAGE_COURSES_LIST) || currentPage.StartsWith(WebConstants.PAGE_COURSES_REGISTER)) ? "active" : string.Empty)">
+                <i class="nav-icon nav-icon fas fa-calendar-alt"></i>
+                <p>
+                    Khóa học
+                    <i class="fas fa-angle-left right"></i>
+                </p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="@WebConstants.PAGE_COURSES_LIST" class="nav-link @((currentPage == WebConstants.PAGE_COURSES_LIST) ? "active": string.Empty)">
+                        <i class="fas fa-list nav-icon"></i>
+                        <p>Danh sách Khóa học</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="@WebConstants.PAGE_COURSES_REGISTER" class="nav-link @(currentPage.StartsWith(WebConstants.PAGE_COURSES_REGISTER) ? "active": string.Empty)">
+                        <i class="fas fa-calendar-check nav-icon"></i>
+                        <p>Thông tin Khóa học</p>
+                    </a>
+                </li>
+            </ul>
         </li>
         @if (User.IsInRole(WebConstants.CONST_ROLE_ADMIN))
         {
-            <li class="nav-header">QUẢN LÝ NGƯỜI DÙNG</li>
             <li class="nav-item">
                 <a href="@WebConstants.PAGE_USERS_LIST" class="nav-link @((currentPage == WebConstants.PAGE_USERS_LIST) ? "active": string.Empty)">
                     <i class="nav-icon fas fa-users"></i>

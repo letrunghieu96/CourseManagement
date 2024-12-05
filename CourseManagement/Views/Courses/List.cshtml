@@ -1,0 +1,69 @@
+﻿@{
+    ViewData["Title"] = "Khóa học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using CourseManagement.Constants
+@using CourseManagement.ViewModels.Courses
+@model CourseListViewModel
+
+<!-- Page header -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h1 class="text-bold">Quản lý Khóa học</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        <div class="card-header pl-2">
+            @{
+                await Html.RenderPartialAsync(WebConstants.PARTIAL_VIEW_COURSES_SEARCH_CONDITION, Model.Condition);
+            }
+        </div>
+        <div class="card-header pl-2">
+            <h5 class="title">Danh sách Khóa học</h5>
+        </div>
+        <div class="card-body pt-2">
+            <div class="table-responsive mb-2">
+                <table class="table table-bordered table-hover" id="tblCourses">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="table-sort" data-sort-by="CourseCode">Mã khóa học</th>
+                            <th rowspan="2" class="table-sort" data-sort-by="CourseName">Tên khóa học</th>
+                            <th colspan="3">Thời gian</th>
+                            <th rowspan="2" class="table-sort" data-sort-by="IsActive">Trạng thái</th>
+                            <th rowspan="2" class="table-sort" data-sort-by="CreatedBy">Người tạo</th>
+                            <th rowspan="2" class="table-sort" data-sort-by="CreatedAt">Ngày tạo</th>
+                            <th rowspan="2"></th>
+                        </tr>
+                        <tr>
+                            <th class="table-sort" data-sort-by="Duration">Giờ</th>
+                            <th class="table-sort" data-sort-by="StartDate">Bắt đầu</th>
+                            <th class="table-sort" data-sort-by="EndDate">Kết thúc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @await Html.PartialAsync(WebConstants.PARTIAL_VIEW_COURSES_SEARCH_RESULTS, Model.Results)
+                    </tbody>
+                </table>
+            </div>
+            <div class="row" id="dvPagination">
+                @await Html.PartialAsync(WebConstants.PARTIAL_VIEW_PAGINATION)
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <!-- JS -->
+    <script src="../../js/search.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script src="../../js/courses.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script>
+        avoidFormResubmission();
+    </script>
+}

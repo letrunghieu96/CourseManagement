@@ -7,6 +7,24 @@ using System.Data;
 namespace CourseManagement.Domain.Users
 {
     /// <summary>
+    /// User repository interface
+    /// </summary>
+    public interface IUsersRepository
+    {
+        int GetTotal();
+        SearchResult[] GetTopLatest(int top);
+        int Count(SearchCondition condition);
+        SearchResult[] Search(SearchCondition condition);
+        UserModel CheckLogin(string email, string passwordHash);
+        UserModel Get(int userId);
+        bool IsExistEmail(int userId, string email);
+        int Insert(UserModel model);
+        bool Update(int userId, UserModel model);
+        bool UpdatePassword(int userId, string passwordHash, string lastChanged);
+        bool Delete(int userId);
+    }
+
+    /// <summary>
     /// Users repository
     /// </summary>
     internal class UsersRepository : RepositoryBase, IUsersRepository
@@ -14,6 +32,34 @@ namespace CourseManagement.Domain.Users
         public UsersRepository(SqlConnection sqlConnection, IDbTransaction dbTransaction)
             : base(sqlConnection, dbTransaction)
         {
+        }
+
+        public int GetTotal()
+        {
+            try
+            {
+                var total = _dbConnection.ExecuteScalar<int>(UsersQuery.GetTotal, transaction: _dbTransaction);
+                return total;
+            }
+            catch
+            {
+            }
+
+            return 0;
+        }
+
+        public SearchResult[] GetTopLatest(int top)
+        {
+            try
+            {
+                var results = _dbConnection.Query<SearchResult>(UsersQuery.GetTopLatest, new { top }, transaction: _dbTransaction);
+                return results.ToArray();
+            }
+            catch
+            {
+            }
+
+            return new SearchResult[0];
         }
 
         public int Count(SearchCondition condition)
@@ -61,7 +107,6 @@ namespace CourseManagement.Domain.Users
 
             return new SearchResult[0];
         }
-
 
         public UserModel CheckLogin(string email, string passwordHash)
         {
@@ -186,17 +231,12 @@ namespace CourseManagement.Domain.Users
             return false;
         }
 
-        public bool Delete(int userId, string lastChanged)
+        public bool Delete(int userId)
         {
             try
             {
-                // Parameters
-                var parameters = new DynamicParameters();
-                parameters.Add("UserId", userId, DbType.Int32);
-                parameters.Add("LastChanged", lastChanged, DbType.String, size: 100);
-
                 // Delete
-                var rowsAffected = _dbConnection.Execute(UsersQuery.Delete, parameters, transaction: _dbTransaction);
+                var rowsAffected = _dbConnection.Execute(UsersQuery.Delete, new { userId }, transaction: _dbTransaction);
                 return (rowsAffected > 0);
             }
             catch

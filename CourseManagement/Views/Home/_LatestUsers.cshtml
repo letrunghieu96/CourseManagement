@@ -1,0 +1,24 @@
+﻿@using CourseManagement.Constants
+@using CourseManagement.Domain.Users.Helpers
+@model SearchResult[]
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Thành viên mới nhất</h3>
+    </div>
+    <div class="card-body p-0">
+        <ul class="users-list clearfix">
+            @if (Model.Length > 0) foreach (var result in Model)
+            {
+                <li>
+                    <img src="dist/img/user1-128x128.jpg" alt="User Image" />
+                    <a class="users-list-name" href="#">@result.FullName</a>
+                    <span class="users-list-date">@result.CreatedAt</span>
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="card-footer text-center">
+        <a href="@WebConstants.PAGE_USERS_LIST">Xem tất cả</a>
+    </div>
+</div>

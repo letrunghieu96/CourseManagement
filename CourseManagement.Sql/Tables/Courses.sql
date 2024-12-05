@@ -20,9 +20,7 @@ CREATE TABLE [dbo].[Courses] (
     [CreatedBy] [int] NOT NULL,
     [CreatedAt] [datetime] NOT NULL DEFAULT (GETDATE()),
     [UpdatedAt] [datetime],
-    [DeletedAt] [datetime],
-    [LastChanged] [nvarchar] (100) NOT NULL DEFAULT (N''),
-    [DeletedFlag] [tinyint] NOT NULL DEFAULT (0)
+    [LastChanged] [nvarchar] (100) NOT NULL DEFAULT (N'')
 ) ON [PRIMARY]
 GO
 

@@ -5,6 +5,18 @@ using System.Data;
 namespace CourseManagement.Domain
 {
     /// <summary>
+    /// Domain facade interface
+    /// </summary>
+    public interface IDomainFacade
+    {
+        IUsersRepository Users { get; }
+        ICoursesRepository Courses { get; }
+
+        void Commit();
+        void Rollback();
+    }
+
+    /// <summary>
     /// Domain facade
     /// </summary>
     public class DomainFacade : IDomainFacade

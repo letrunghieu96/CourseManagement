@@ -1,5 +1,4 @@
-﻿using CourseManagement.Constants;
-using CourseManagement.Domain;
+﻿using CourseManagement.Domain;
 using CourseManagement.Domain.Users;
 using CourseManagement.Models;
 using CourseManagement.ViewModels.Users;
@@ -35,11 +34,6 @@ namespace CourseManagement.Services
             return model;
         }
 
-        /// <summary>
-        /// Create
-        /// </summary>
-        /// <param name="viewModel">User view model</param>
-		/// <returns>True: if the create is successful, otherwise: False</returns>
         public bool Create(UserViewModel viewModel)
         {
             var model = new UserModel
@@ -49,10 +43,16 @@ namespace CourseManagement.Services
                 PasswordHash = HashPassword(viewModel.Password ?? string.Empty),
                 Role = viewModel.Role,
                 IsActive = 1,
-                LastChanged = WebConstants.CONST_LAST_CHANGED_USER,
+                LastChanged = "User",
             };
             var userId = _domainFacade.Users.Insert(model);
-            return (userId > 0);
+            if (userId > 0)
+            {
+                _domainFacade.Commit();
+                return true;
+            }
+
+            return false;
         }
     }
 }

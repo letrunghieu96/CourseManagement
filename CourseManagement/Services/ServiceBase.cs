@@ -1,4 +1,6 @@
-﻿using CourseManagement.Domain;
+﻿using CourseManagement.Constants;
+using CourseManagement.Domain;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -36,11 +38,23 @@ namespace CourseManagement.Services
         }
 
         /// <summary>
+        /// Convert date
+        /// </summary>
+        /// <param name="dateString">Date string</param>
+        /// <returns>Date time</returns>
+        public static DateTime? ConvertDate(string? dateString)
+        {
+            if (DateTime.TryParseExact(dateString, WebConstants.DATE_FORMAT_VN, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime result)) return result;
+
+            return null;
+        }
+
+        /// <summary>
         /// Is exist email
         /// </summary>
         /// <param name="userId">User id</param>
         /// <param name="email">Email</param>
-		/// <returns>True: if exist, otherwise: False</returns>
+        /// <returns>True: if exist, otherwise: False</returns>
         public bool IsExistEmail(int userId, string email)
         {
             var isExist = _domainFacade.Users.IsExistEmail(userId, email);

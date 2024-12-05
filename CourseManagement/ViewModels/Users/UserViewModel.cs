@@ -32,7 +32,7 @@ namespace CourseManagement.ViewModels.Users
         public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vai trò là trường bắt buộc")]
-        public string Role { get; set; } = WebConstants.CONST_LAST_CHANGED_USER;
+        public string Role { get; set; } = "User";
 
         public bool IsActive { get; set; } = true;
 

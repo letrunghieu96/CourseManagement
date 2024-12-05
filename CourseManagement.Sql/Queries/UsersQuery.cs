@@ -8,18 +8,32 @@ namespace CourseManagement.Sql.Queries
     [ExcludeFromCodeCoverage]
     public static class UsersQuery
     {
+        public static string GetTotal =>
+        @"
+            SELECT  COUNT(UserId)
+              FROM  Users
+        ";
+
+        public static string GetTopLatest =>
+        @"
+            SELECT  TOP (@Top) *
+              FROM  Users
+          ORDER BY  CreatedAt DESC
+        ";
+
         public static string Count =>
         @"
             SELECT  COUNT(UserId)
               FROM  Users
              WHERE  (
-                      FullName LIKE '%' + @SearchWord + '%' OR @SearchWord = ''
+                      FullName LIKE '%' + @SearchWord + '%'
                       OR
-                      Email LIKE '%' + @SearchWord + '%' OR @SearchWord = ''
+                      Email LIKE '%' + @SearchWord + '%'
+                      OR
+                      @SearchWord = ''
                     )
                AND  (Role = @Role OR @Role = '')
                AND  (IsActive = @IsActive OR @IsActive IS NULL)
-               AND  DeletedFlag = 0
         ";
 
         public static string Search =>
@@ -27,13 +41,14 @@ namespace CourseManagement.Sql.Queries
             SELECT  *
               FROM  Users
              WHERE  (
-                      FullName LIKE '%' + @SearchWord + '%' OR @SearchWord = ''
+                      FullName LIKE '%' + @SearchWord + '%'
                       OR
-                      Email LIKE '%' + @SearchWord + '%' OR @SearchWord = ''
+                      Email LIKE '%' + @SearchWord + '%'
+                      OR
+                      @SearchWord = ''
                     )
                AND  (Role = @Role OR @Role = '')
                AND  (IsActive = @IsActive OR @IsActive IS NULL)
-               AND  DeletedFlag = 0
           ORDER BY
                     CASE @OrderBy
                       WHEN  '1' THEN FullName
@@ -81,7 +96,6 @@ namespace CourseManagement.Sql.Queries
              WHERE  Email = @Email
                AND  PasswordHash = @PasswordHash
                AND  IsActive = 1
-               AND  DeletedFlag = 0
         ";
 
         public static string Get =>
@@ -89,12 +103,11 @@ namespace CourseManagement.Sql.Queries
             SELECT  *
               FROM  Users
              WHERE  UserId = @UserId
-               AND  DeletedFlag = 0
         ";
 
         public static string CheckExistEmail =>
         @"
-            SELECT  CASE WHEN EXISTS (SELECT 1 FROM Users WHERE Email = @Email AND UserId <> @UserId AND DeletedFlag = 0)
+            SELECT  CASE WHEN EXISTS (SELECT 1 FROM Users WHERE Email = @Email AND UserId <> @UserId)
                         THEN 1
                         ELSE 0
                     END AS Result
@@ -111,7 +124,6 @@ namespace CourseManagement.Sql.Queries
                     ,IsActive
                     ,CreatedAt
                     ,LastChanged
-                    ,DeletedFlag
                 )
             VALUES
                 (
@@ -122,7 +134,6 @@ namespace CourseManagement.Sql.Queries
                     ,@IsActive
                     ,GETDATE()
                     ,@LastChanged
-                    ,0
                 )
 
             SELECT SCOPE_IDENTITY();
@@ -151,10 +162,7 @@ namespace CourseManagement.Sql.Queries
 
         public static string Delete =>
         @"
-            UPDATE  Users
-               SET  DeletedFlag = 1
-                    ,DeletedAt = GETDATE()
-                    ,LastChanged = @LastChanged
+            DELETE  Users
              WHERE  UserId = @UserId
         ";
     }

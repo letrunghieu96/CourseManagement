@@ -85,5 +85,6 @@ namespace CourseManagement.Controllers
         public int UserId => (this.UserLogin != null) ? this.UserLogin.UserId : 0;
         public string UserFullName => (this.UserLogin != null) ? this.UserLogin.FullName : string.Empty;
         public string UserRole => (this.UserLogin != null) ? this.UserLogin.Role : string.Empty;
+        public bool IsAdmin => (this.UserRole == WebConstants.CONST_ROLE_ADMIN);
     }
 }

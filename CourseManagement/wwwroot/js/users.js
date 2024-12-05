@@ -93,13 +93,13 @@ function changePassword() {
 }
 
 // Delete
-function deleteUser(id, fullName) {
+function deleteUser(userId, fullName) {
     var isOK = confirm(`Bạn có chắc chắn muốn xóa Người dùng "${fullName}" không?`);
     if (isOK === false) return;
 
     $.ajax({
         type: "DELETE",
-        url: `/Users/Delete/${id}`,
+        url: `/Users/Delete/${userId}`,
         success: function (result) {
             $(document).Toasts('create', {
                 class: result.isSuccess ? 'bg-info' : 'bg-danger',

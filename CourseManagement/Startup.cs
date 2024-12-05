@@ -1,5 +1,6 @@
 ﻿using CourseManagement.Domain.Extensions;
 using CourseManagement.Middlewares;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -54,6 +55,15 @@ public class Startup
             option.Cookie.HttpOnly = true;
             option.Cookie.IsEssential = true;
         });
+        services.AddAuthentication(option =>
+        {
+            option.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        })
+        .AddCookie(option =>
+        {
+            option.LoginPath = "/";
+            option.LogoutPath = "/Index/Logout";
+        });
     }
     #endregion
 
@@ -82,6 +92,8 @@ public class Startup
         app.UseRouting();
         app.UseCors(cors => cors.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.UseSession();
 
         // Middleware

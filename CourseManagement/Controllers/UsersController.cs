@@ -5,11 +5,13 @@ using CourseManagement.Helpers;
 using CourseManagement.Services;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace CourseManagement.Controllers
 {
+    [Authorize]
     public class UsersController : ControllerBase<UsersController>
     {
         public UsersController(IConfiguration config, IDomainFacade domainFacade)
@@ -62,7 +64,6 @@ namespace CourseManagement.Controllers
             var isSuccess = isUpdate
                 ? this.Service.Update(viewModel)
                 : this.Service.Create(viewModel);
-            if (isSuccess) _domainFacade.Commit();
 
             // Result
             var jsonResult = new JsonResultViewModel
@@ -80,7 +81,6 @@ namespace CourseManagement.Controllers
 
             // Change password
             var isSuccess = this.Service.ChangePassword(viewModel.UserId, viewModel.Password, this.UserFullName);
-            if (isSuccess) _domainFacade.Commit();
 
             // Result
             var jsonResult = new JsonResultViewModel
@@ -95,10 +95,7 @@ namespace CourseManagement.Controllers
         public IActionResult Delete(int userId)
         {
             // Delete
-            var isSuccess = this.Service.Delete(userId, this.UserFullName);
-            if (isSuccess) _domainFacade.Commit();
-
-            // Result
+            var isSuccess = this.Service.Delete(userId);
             var jsonResult = new JsonResultViewModel
             {
                 IsSuccess = isSuccess,

@@ -1,0 +1,130 @@
+﻿@{
+    ViewData["Title"] = "Thông tin Khóa học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using CourseManagement.Constants
+@using CourseManagement.ViewModels.Courses
+@model CourseViewModel
+
+<!-- Page header -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h1 class="text-bold">Khóa học</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <h5 class="title">Thông tin chi tiết</h5>
+            </div>
+        </div>
+        <div class="card-body">
+            <form id="frmInput">
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label asp-for="CourseName" class="required">Mã khóa học</label>
+                        <input asp-for="CourseCode" type="text" class="form-control" maxlength="100" autocomplete="off" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CourseName" class="required">Tên khóa học</label>
+                        <input asp-for="CourseName" type="text" class="form-control" maxlength="100" autocomplete="off" />
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label asp-for="Duration" class="required">Thời lượng (theo giờ)</label>
+                        <input asp-for="Duration" type="text" class="form-control" autocomplete="off" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="StartDate" class="required">Thời gian (bắt đầu)</label>
+                        <div class="input-group date max-w-150px" id="dvStartDate" data-target-input="nearest">
+                            <input type="text" id="tbStartDate" name="StartDate" class="form-control datetimepicker-input" value="@Model.StartDate" data-target="#dvStartDate" />
+                            <div class="input-group-append" data-target="#dvStartDate" data-toggle="datetimepicker">
+                                <div class="input-group-text">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="StartDate" class="required">Thời gian (kết thúc)</label>
+                        <div class="input-group date max-w-150px" id="dvEndDate" data-target-input="nearest">
+                            <input type="text" id="tbEndDate" name="EndDate" class="form-control datetimepicker-input" value="@Model.EndDate" data-target="#dvEndDate" />
+                            <div class="input-group-append" data-target="#dvEndDate" data-toggle="datetimepicker">
+                                <div class="input-group-text">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label asp-for="Price" class="required">Giá khóa học</label>
+                        <input asp-for="Price" type="text" class="form-control" autocomplete="off" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="IsActive">Trạng thái</label>
+                        <div class="icheck-primary">
+                            <input type="checkbox" asp-for="IsActive" class="form-control" />
+                            <label asp-for="IsActive">Hoạt động</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-12">
+                        <label asp-for="Description">Mô tả</label>
+                        <textarea asp-for="Description" class="form-control" type="text" rows="3" maxlength="1000"></textarea>
+                    </div>
+                </div>
+                @if (Model.IsUpdate)
+                {
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Được tạo bởi: </label> <span>@Model.CreatorName lúc @Model.CreatedAt</span>
+                        </div>
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <label>Thời gian cập nhật: </label> <span>@Model.UpdatedAt?.ToString(WebConstants.DATE_TIME_FORMAT_VN)</span>
+                            </div>
+                        }
+                        <div class="col-md-4">
+                            <label>Lần cuối thay đổi: </label> <span>@Model.LastChanged</span>
+                        </div>
+                    </div>
+                }
+                <div class="row mb-2">
+                    <div class="col-md-12 text-right">
+                        @if (Model.IsUpdate)
+                        {
+                            <button type="button" class="btn btn-danger" onclick="deleteCourse(@Model.CourseId)">Xóa</button>
+                            <button id="btnSave" type="button" onclick="save()" class="btn btn-primary">Cập nhật</button>
+                        }
+                        else
+                        {
+                            <button id="btnSave" type="button" onclick="save()" class="btn btn-primary">Thêm</button>
+                        }
+                        <a href="@WebConstants.PAGE_COURSES_LIST" class="btn btn-primary">Danh sách</a>
+                        @Html.HiddenFor(model => model.CourseId)
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <!-- JS -->
+    <script src="../../js/courses.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script>
+        avoidFormResubmission();
+    </script>
+}

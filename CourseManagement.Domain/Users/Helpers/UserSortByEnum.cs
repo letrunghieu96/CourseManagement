@@ -1,4 +1,4 @@
-﻿namespace CourseManagement.Domain.Users
+﻿namespace CourseManagement.Domain.Users.Helpers
 {
     enum UserSortByEnum
     {

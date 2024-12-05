@@ -70,13 +70,14 @@ namespace CourseManagement.Controllers
             HttpContext.Session.SetString("UserFullName", this.UserFullName);
             HttpContext.Session.SetString("UserRoleText", ValueTextHelper.GetRoleText(this.UserRole));
 
-            // Set role
+            // Set claims
             var authClaims = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            authClaims.AddClaim(new Claim(ClaimTypes.NameIdentifier, this.UserId.ToString()));
             authClaims.AddClaim(new Claim(ClaimTypes.Role, this.UserRole));
             authClaims.AddClaim(new Claim(ClaimTypes.Name, this.UserFullName));
             HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(authClaims));
 
-            return LocalRedirect(WebConstants.PAGE_USERS_LIST);
+            return LocalRedirect(WebConstants.PAGE_HOME);
         }
 
         [HttpGet("/Register")]
@@ -96,7 +97,6 @@ namespace CourseManagement.Controllers
 
             // Create
             var isSuccess = this.Service.Create(viewModel);
-            if (isSuccess) _domainFacade.Commit();
 
             // Result
             var jsonResult = new JsonResultViewModel
@@ -105,6 +105,16 @@ namespace CourseManagement.Controllers
                 Message = isSuccess ? ErrorMessageHelper.RegistrationSuccessfully : ErrorMessageHelper.RegistrationFailed,
             };
             return Json(jsonResult);
+        }
+
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            HttpContext.Response.Cookies.Delete("CourseManagement.AspNetCore.Session");
+            HttpContext.SignOutAsync();
+
+            return RedirectToAction("Index");
         }
 
         #region +Properties

@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model HomeModel
+
+<!-- Page header -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h1 class="text-bold">Trang chủ</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-calendar-alt"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-text">Khóa học</span>
+                    <span class="info-box-number">@Model.TotalCourses</span>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix hidden-md-up"></div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+                <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-text">Thành viên</span>
+                    <span class="info-box-number">@Model.TotalUsers</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <partial name="_LatestCourses" model="@Model.LatestCourses" />
+        </div>
+        <div class="col-md-4">
+            <partial name="_LatestUsers" model="@Model.LatestUsers" />
+        </div>
+    </div>
+</section>

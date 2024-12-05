@@ -72,6 +72,8 @@ namespace CourseManagement.Services
                 LastChanged = viewModel.LastChanged,
             };
             var userId = _domainFacade.Users.Insert(model);
+            if (userId > 0) _domainFacade.Commit();
+
             return (userId > 0);
         }
 
@@ -86,18 +88,24 @@ namespace CourseManagement.Services
                 LastChanged = viewModel.LastChanged,
             };
             var isSuccess = _domainFacade.Users.Update(viewModel.UserId, model);
+            if (isSuccess) _domainFacade.Commit();
+
             return isSuccess;
         }
 
         public bool ChangePassword(int userId, string password, string lastChanged)
         {
             var isSuccess = _domainFacade.Users.UpdatePassword(userId, HashPassword(password), lastChanged);
+            if (isSuccess) _domainFacade.Commit();
+
             return isSuccess;
         }
 
-        public bool Delete(int userId, string lastChanged)
+        public bool Delete(int userId)
         {
-            var isSuccess = _domainFacade.Users.Delete(userId, lastChanged);
+            var isSuccess = _domainFacade.Users.Delete(userId);
+            if (isSuccess) _domainFacade.Commit();
+
             return isSuccess;
         }
     }

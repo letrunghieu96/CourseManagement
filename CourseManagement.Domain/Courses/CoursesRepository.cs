@@ -1,10 +1,30 @@
-﻿using CourseManagement.Sql.Queries;
+﻿using CourseManagement.Domain.Courses.Helpers;
+using CourseManagement.Sql.Queries;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace CourseManagement.Domain.Courses
 {
+    /// <summary>
+    /// Course repository interface
+    /// </summary>
+    public interface ICoursesRepository
+    {
+        int GetTotal();
+        SearchResult[] GetTopLatest(int top);
+        int Count(SearchCondition condition);
+        SearchResult[] Search(SearchCondition condition);
+        CourseModel Get(int userId);
+        bool IsExistCourseCode(int courseId, string courseCode);
+        int Insert(CourseModel model);
+        bool Update(int courseId, CourseModel model);
+        bool Delete(int courseId);
+    }
+
+    /// <summary>
+    /// Course repository
+    /// </summary>
     internal class CoursesRepository : RepositoryBase, ICoursesRepository
     {
         public CoursesRepository(SqlConnection sqlConnection, IDbTransaction dbTransaction)
@@ -12,16 +32,49 @@ namespace CourseManagement.Domain.Courses
         {
         }
 
-
-        public int Count(object parameters)
+        public int GetTotal()
         {
             try
             {
-                var count = _dbConnection.ExecuteScalar<int>(
-                    "spUsers_Count",
-                    parameters,
-                    transaction: _dbTransaction,
-                    commandType: CommandType.StoredProcedure);
+                var total = _dbConnection.ExecuteScalar<int>(CoursesQuery.GetTotal, transaction: _dbTransaction);
+                return total;
+            }
+            catch
+            {
+            }
+
+            return 0;
+        }
+
+        public SearchResult[] GetTopLatest(int top)
+        {
+            try
+            {
+                var results = _dbConnection.Query<SearchResult>(CoursesQuery.GetTopLatest, new { top }, transaction: _dbTransaction);
+                return results.ToArray();
+            }
+            catch
+            {
+            }
+
+            return new SearchResult[0];
+        }
+
+        public int Count(SearchCondition condition)
+        {
+            try
+            {
+                // Parameters
+                var parameters = new DynamicParameters();
+                parameters.Add("SearchWord", condition.SearchWord ?? string.Empty, DbType.String, size: 100);
+                parameters.Add("StartDateFrom", condition.StartDateFrom, DbType.Date);
+                parameters.Add("StartDateTo", condition.StartDateTo, DbType.Date);
+                parameters.Add("EndDateFrom", condition.EndDateFrom, DbType.Date);
+                parameters.Add("EndDateTo", condition.EndDateTo, DbType.Date);
+                parameters.Add("IsActive", condition.IsActive, DbType.Int16);
+                parameters.Add("CreatorName", condition.CreatorName ?? string.Empty, DbType.String, size: 100);
+
+                var count = _dbConnection.ExecuteScalar<int>(CoursesQuery.Count, parameters, transaction: _dbTransaction);
                 return count;
             }
             catch
@@ -31,24 +84,33 @@ namespace CourseManagement.Domain.Courses
             return 0;
         }
 
-        public IEnumerable<CourseModel> Search(object parameters)
+        public SearchResult[] Search(SearchCondition condition)
         {
             try
             {
-                var results = _dbConnection.Query<CourseModel>(
-                    "spUsers_Search",
-                    parameters,
-                    transaction: _dbTransaction,
-                    commandType: CommandType.StoredProcedure);
-                return results;
+                // Parameters
+                var parameters = new DynamicParameters();
+                parameters.Add("SearchWord", condition.SearchWord ?? string.Empty, DbType.String, size: 100);
+                parameters.Add("StartDateFrom", condition.StartDateFrom, DbType.Date);
+                parameters.Add("StartDateTo", condition.StartDateTo, DbType.Date);
+                parameters.Add("EndDateFrom", condition.EndDateFrom, DbType.Date);
+                parameters.Add("EndDateTo", condition.EndDateTo, DbType.Date);
+                parameters.Add("IsActive", condition.IsActive, DbType.Int16);
+                parameters.Add("CreatorName", condition.CreatorName ?? string.Empty, DbType.String, size: 100);
+                parameters.Add("BeginRowNum", condition.BeginRowNum, DbType.Int32);
+                parameters.Add("RowsOfPage", condition.PageLength, DbType.Int32);
+                var orderBy = Enum.TryParse(condition.OrderBy, out CourseSortByEnum sortBy) ? (int)sortBy : 0;
+                parameters.Add("OrderBy", orderBy, DbType.String, size: 2);
+
+                var results = _dbConnection.Query<SearchResult>(CoursesQuery.Search, parameters, transaction: _dbTransaction);
+                return results.ToArray();
             }
             catch
             {
             }
 
-            return Enumerable.Empty<CourseModel>();
+            return new SearchResult[0];
         }
-
 
         public CourseModel Get(int courseId)
         {
@@ -84,7 +146,6 @@ namespace CourseManagement.Domain.Courses
             return false;
         }
 
-
         public int Insert(CourseModel model)
         {
             try
@@ -99,6 +160,7 @@ namespace CourseManagement.Domain.Courses
                 parameters.Add("EndDate", model.EndDate, DbType.Date);
                 parameters.Add("Price", model.Price, DbType.Decimal);
                 parameters.Add("IsActive", model.IsActive, DbType.Int16);
+                parameters.Add("CreatedBy", model.CreatedBy, DbType.Int32);
                 parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
 
                 // Insert
@@ -118,7 +180,7 @@ namespace CourseManagement.Domain.Courses
             {
                 // Parameters
                 var parameters = new DynamicParameters();
-                parameters.Add("UserId", courseId, DbType.Int32);
+                parameters.Add("CourseId", courseId, DbType.Int32);
                 parameters.Add("CourseCode", model.CourseCode, DbType.String, size: 50);
                 parameters.Add("CourseName", model.CourseName, DbType.String, size: 255);
                 parameters.Add("Description", model.Description, DbType.String);
@@ -140,17 +202,12 @@ namespace CourseManagement.Domain.Courses
             return false;
         }
 
-        public bool Delete(int courseId, string lastChanged)
+        public bool Delete(int courseId)
         {
             try
             {
-                // Parameters
-                var parameters = new DynamicParameters();
-                parameters.Add("CourseId", courseId, DbType.Int32);
-                parameters.Add("LastChanged", lastChanged, DbType.String, size: 100);
-
                 // Delete
-                var rowsAffected = _dbConnection.Execute(CoursesQuery.Delete, parameters, transaction: _dbTransaction);
+                var rowsAffected = _dbConnection.Execute(CoursesQuery.Delete, new { courseId }, transaction: _dbTransaction);
                 return (rowsAffected > 0);
             }
             catch
