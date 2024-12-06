@@ -1,5 +1,4 @@
-﻿@using CourseManagement.Constants
-@using CourseManagement.Helpers
+﻿@using CourseManagement.Helpers
 @using CourseManagement.ViewModels.Users
 @model UserViewModel
 
@@ -17,13 +16,13 @@
                     <div class="col-md-6">
                         <div class="row mb-2">
                             <div class="col-md-12">
-                                @Html.LabelFor(model => model.FullName, "Họ tên", new { @class = "required" })
+                                <label asp-for="FullName" class="required">Họ tên</label>
                                 <input asp-for="FullName" type="text" class="form-control" maxlength="100" autocomplete="off" />
                             </div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-12">
-                                @Html.LabelFor(model => model.Email, "Email", new { @class = "required" })
+                                <label asp-for="Email" class="required">Email</label>
                                 <input asp-for="Email" type="email" class="form-control" maxlength="100" autocomplete="off" />
                             </div>
                         </div>
@@ -31,12 +30,12 @@
                     <div class="col-md-6">
                         <div class="row mb-2">
                             <div class="col-md-12">
-                                @Html.LabelFor(model => model.Role, "Vai trò")
+                                <label asp-for="UserRole">Vai trò</label>
                                 <div class="form-group clearfix">
-                                    @foreach (var item in ValueTextHelper.GetRoles(false))
+                                    @foreach (var item in ValueTextHelper.GetUserRoles(false))
                                     {
                                         <div class="icheck-primary d-inline">
-                                            <input type="radio" id="cbStatus@(item.Value)" name="Role" value="@item.Value" @((Model.Role == item.Value) ? "checked" : string.Empty)>
+                                            <input type="radio" id="cbStatus@(item.Value)" name="Role" value="@item.Value" @((Model.UserRole == item.Value) ? "checked" : string.Empty)>
                                             <label for="cbStatus@(item.Value)">@item.Text</label>
                                         </div>
                                     }
@@ -45,10 +44,10 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-12 mb-2">
-                                @Html.LabelFor(model => model.IsActive, "Trạng thái")
+                                <label asp-for="Status">Trạng thái</label>
                                 <div class="icheck-primary">
-                                    <input type="checkbox" asp-for="IsActive" class="form-control" style="width: 20%;" />
-                                    <label asp-for="IsActive">Kích hoạt</label>
+                                    <input type="checkbox" asp-for="Status" class="form-control" style="width: 20%;" />
+                                    <label asp-for="Status">Kích hoạt</label>
                                 </div>
                             </div>
                         </div>
@@ -58,12 +57,12 @@
                 {
                     <div class="row">
                         <div class="col-md-6">
-                            @Html.LabelFor(model => model.Password, "Mật khẩu", new { @class = "required" })
-                            <input asp-for="Password" type="password" class="form-control" maxlength="30" autocomplete="off" />
+                            <label asp-for="Password" class="required">Mật khẩu</label>
+                            <input asp-for="Password" type="password" class="form-control" maxlength="20" autocomplete="off" />
                         </div>
                         <div class="col-md-6">
-                            @Html.LabelFor(model => model.ConfirmPassword, "Mật khẩu (xác nhận)", new { @class = "required" })
-                            <input asp-for="ConfirmPassword" type="password" class="form-control" maxlength="30" autocomplete="off" />
+                            <label asp-for="ConfirmPassword" class="required">Mật khẩu (xác nhận)</label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" maxlength="20" autocomplete="off" />
                         </div>
                     </div>
                     <div class="row">
@@ -107,14 +106,7 @@
                 <a class="btn btn-link btn-sm" data-toggle="modal" data-target="#modalChangePasswordForm">Đổi mật khẩu</a>
             }
             <button id="btnDelete" type="button" data-dismiss="modal" class="btn btn-secondary">Hủy</button>
-            @if (Model.IsUpdate)
-            {
-                <button id="btnSave" type="button" onclick="save()" class="btn btn-primary">Cập nhật</button>
-            }
-            else
-            {
-                <button id="btnSave" type="button" onclick="save()" class="btn btn-primary">Thêm</button>
-            }
+            <button id="btnSave" type="button" onclick="save()" class="btn btn-primary">@(Model.IsUpdate ? "Cập nhật" : "Thêm")</button>
         </div>
     </div>
 </div>

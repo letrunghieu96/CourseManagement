@@ -12,10 +12,8 @@
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal Price { get; set; }
-        public int IsActive { get; set; }
-        public int CreatedBy { get; set; }
-        public string CreatorName { get; set; }
+        public int Status { get; set; }
+        public string Lecturer { get; set; }
         public DateTime CreatedAt { get; set; }
-        public bool CanDelete { get; set; }
     }
 }

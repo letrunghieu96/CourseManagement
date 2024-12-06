@@ -1,5 +1,4 @@
-﻿@using CourseManagement.Constants
-@using CourseManagement.Domain.Courses.Helpers
+﻿@using CourseManagement.Domain.Courses.Helpers
 @using CourseManagement.Helpers
 @model SearchResult[]
 
@@ -12,17 +11,17 @@
         <td>@result.StartDate.ToString(WebConstants.DATE_FORMAT_VN)</td>
         <td>@result.EndDate.ToString(WebConstants.DATE_FORMAT_VN)</td>
         <td>
-            <span class="badge badge-@((result.IsActive == 1) ? "primary" : "warning")">
-                @ValueTextHelper.GetActivityText(result.IsActive.ToString())
+            <span class="badge badge-@((result.Status == 1) ? "primary" : "warning")">
+                @ValueTextHelper.GetStatusText(result.Status.ToString())
             </span>
         </td>
-        <td>@result.CreatorName</td>
+        <td>@result.Lecturer</td>
         <td>@result.CreatedAt.ToString(WebConstants.DATE_TIME_FORMAT_VN)</td>
         <td class="text-center">
             <a href="@WebConstants.PAGE_COURSES_REGISTER/@result.CourseId" class="btn btn-info btn-sm">
                 <i class="fas fa-eye"></i>
             </a>
-            @if (result.CanDelete)
+            @if (User.IsInRole("Admin"))
             {
                 <button class="btn btn-danger btn-sm" onclick="deleteCourse(@result.CourseId, '@result.CourseCode')">
                     <i class="fas fa-trash"></i>

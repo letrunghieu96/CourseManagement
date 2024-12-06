@@ -1,5 +1,4 @@
-﻿@using CourseManagement.Constants
-@using CourseManagement.Domain.Users.Helpers
+﻿@using CourseManagement.Domain.Users.Helpers
 @using CourseManagement.Helpers
 @model SearchCondition
 
@@ -10,28 +9,26 @@
     data-ajax-update="#tblUsers tbody"
     data-ajax-mode="replace"
     data-ajax-success="loadPagination()"
-    data-ajax-url="@Url.Action("Search", WebConstants.CONTROLLER_USERS)">
+    data-ajax-url="@Url.Action("Search", "Users")">
 
     <div class="row mb-2">
         <div class="col-md-2 mb-2">
             <label>Người dùng</label>
-            @Html.TextBoxFor(
-                model => model.SearchWord,
-                new { @class = "form-control form-control-md", @type="search", @maxlength=100, @autocomplete="off" })
+            <input asp-for="SearchWord" type="search" class="form-control form-control-md" autocomplete="off" maxlength="100" />
         </div>
         <div class="col-md-2 mb-2">
             <label>Vai trò</label>
             @Html.DropDownListFor(
-                model => model.Role,
-                new SelectList(ValueTextHelper.GetRoles(), "Value", "Text", Model.Role),
-                new { @class = "select2", @style = "width: 100%;" })
+                model => model.UserRole,
+                new SelectList(ValueTextHelper.GetUserRoles(), "Value", "Text", Model.UserRole),
+                new { @id = "ddlUserRole", @class = "select2", @style = "width: 100%;" })
         </div>
         <div class="col-md-2 mb-2">
             <label>Trạng thái</label>
             @Html.DropDownListFor(
-                model => model.IsActive,
-                new SelectList(ValueTextHelper.GetActivities(), "Value", "Text", Model.IsActive),
-                new { @id="ddlStatus", @class = "select2", @style = "width: 100%;" })
+                model => model.Status,
+                new SelectList(ValueTextHelper.GetStatuses(), "Value", "Text", Model.Status),
+                new { @id = "ddlStatus", @class = "select2", @style = "width: 100%;" })
         </div>
     </div>
     <div class="row">
@@ -44,8 +41,8 @@
         </div>
     </div>
 
-    @Html.HiddenFor(model => model.PageLength)
-    @Html.HiddenFor(model => model.PageNo)
-    @Html.HiddenFor(model => model.OrderBy)
+    <input type="hidden" asp-for="PageLength" />
+    <input type="hidden" asp-for="PageNo" />
+    <input type="hidden" asp-for="OrderBy" />
 
 </form>

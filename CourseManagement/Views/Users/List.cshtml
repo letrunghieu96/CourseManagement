@@ -2,7 +2,6 @@
     ViewData["Title"] = "Người dùng";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@using CourseManagement.Constants
 @using CourseManagement.ViewModels.Users
 @model UserListViewModel
 
@@ -33,10 +32,10 @@
                 <table class="table table-bordered table-hover" id="tblUsers">
                     <thead>
                         <tr>
-                            <th class="table-sort" data-sort-by="FullName">Họ tên</th>
+                            <th class="table-sort" data-sort-by="UserName">Họ tên</th>
                             <th class="table-sort" data-sort-by="Email">Email</th>
-                            <th class="table-sort" data-sort-by="Role">Vai trò</th>
-                            <th class="table-sort" data-sort-by="IsActive">Trạng thái</th>
+                            <th class="table-sort" data-sort-by="UserRole">Vai trò</th>
+                            <th class="table-sort" data-sort-by="Status">Trạng thái</th>
                             <th class="table-sort" data-sort-by="CreatedAt">Ngày tạo</th>
                             <th></th>
                         </tr>
@@ -62,8 +61,8 @@
 
 @section scripts {
     <!-- JS -->
-    <script src="../../js/search.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
-    <script src="../../js/users.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script src="../../js/search.js?v=@(WebConstants.CLIENT_VERSION)"></script>
+    <script src="../../js/users.js?v=@(WebConstants.CLIENT_VERSION)"></script>
     <script>
         avoidFormResubmission();
     </script>

@@ -2,7 +2,6 @@
     ViewData["Title"] = "Khóa học";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@using CourseManagement.Constants
 @using CourseManagement.ViewModels.Courses
 @model CourseListViewModel
 
@@ -36,8 +35,8 @@
                             <th rowspan="2" class="table-sort" data-sort-by="CourseCode">Mã khóa học</th>
                             <th rowspan="2" class="table-sort" data-sort-by="CourseName">Tên khóa học</th>
                             <th colspan="3">Thời gian</th>
-                            <th rowspan="2" class="table-sort" data-sort-by="IsActive">Trạng thái</th>
-                            <th rowspan="2" class="table-sort" data-sort-by="CreatedBy">Người tạo</th>
+                            <th rowspan="2" class="table-sort" data-sort-by="Status">Trạng thái</th>
+                            <th rowspan="2" class="table-sort" data-sort-by="Lecturer">Giảng viên</th>
                             <th rowspan="2" class="table-sort" data-sort-by="CreatedAt">Ngày tạo</th>
                             <th rowspan="2"></th>
                         </tr>
@@ -61,8 +60,8 @@
 
 @section scripts {
     <!-- JS -->
-    <script src="../../js/search.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
-    <script src="../../js/courses.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script src="../../js/search.js?v=@(WebConstants.CLIENT_VERSION)"></script>
+    <script src="../../js/courses.js?v=@(WebConstants.CLIENT_VERSION)"></script>
     <script>
         avoidFormResubmission();
     </script>

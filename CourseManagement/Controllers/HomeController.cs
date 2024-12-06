@@ -1,11 +1,12 @@
 ﻿using CourseManagement.Domain;
-using CourseManagement.Models;
 using CourseManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CourseManagement.Controllers
 {
-    public class HomeController : ControllerBase<HomeController>
+    [Authorize]
+    public class HomeController : ControllerBase
     {
         public HomeController(IConfiguration config, IDomainFacade domainFacade)
             : base(config, domainFacade)
@@ -18,7 +19,6 @@ namespace CourseManagement.Controllers
             var model = this.Service.CreateModel();
             return View(model);
         }
-
 
         #region +Properties
         /// <summary>Index work service</summary>

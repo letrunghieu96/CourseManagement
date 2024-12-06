@@ -1,5 +1,4 @@
-﻿using CourseManagement.Constants;
-using CourseManagement.Domain;
+﻿using CourseManagement.Domain;
 using CourseManagement.Domain.Courses.Helpers;
 using CourseManagement.Helpers;
 using CourseManagement.Services;
@@ -12,7 +11,7 @@ using Newtonsoft.Json;
 namespace CourseManagement.Controllers
 {
     [Authorize]
-    public class CoursesController : ControllerBase<CoursesController>
+    public class CoursesController : ControllerBase
     {
         public CoursesController(IConfiguration config, IDomainFacade domainFacade)
             : base(config, domainFacade)
@@ -23,7 +22,6 @@ namespace CourseManagement.Controllers
         public IActionResult List()
         {
             var viewModel = this.Service.CreateListViewModel(new SearchCondition());
-            viewModel.Results.ToList().ForEach(result => result.CanDelete = (this.IsAdmin || (result.CreatedBy == this.UserId)));
             TempData["paging"] = JsonConvert.SerializeObject(viewModel.Pagination);
 
             return View(WebConstants.VIEW_COURSES_LIST, viewModel);
@@ -33,7 +31,6 @@ namespace CourseManagement.Controllers
         public IActionResult Search(SearchCondition condition)
         {
             var viewModel = this.Service.CreateListViewModel(condition);
-            viewModel.Results.ToList().ForEach(result => result.CanDelete = (this.IsAdmin || (result.CreatedBy == this.UserId)));
             TempData["paging"] = JsonConvert.SerializeObject(viewModel.Pagination);
 
             return PartialView(WebConstants.PARTIAL_VIEW_COURSES_SEARCH_RESULTS, viewModel.Results);
@@ -42,7 +39,7 @@ namespace CourseManagement.Controllers
         [HttpGet("{courseId:int?}")]
         public IActionResult Register(int courseId)
         {
-            var viewModel = this.Service.Get(courseId);
+            var viewModel = this.Service.Get(courseId, this.UserId);
             return PartialView(WebConstants.PARTIAL_VIEW_COURSES_REGISTER, viewModel);
         }
 
@@ -52,13 +49,13 @@ namespace CourseManagement.Controllers
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Check exist
-            if (this.Service.IsExistCourseCode(viewModel.CourseId, viewModel.CourseCode)) ModelState.AddModelError("CourseCode", string.Format(ErrorMessageHelper.ExistError, "Mã"));
+            viewModel.CourseCode = viewModel.CourseCode?.ToUpper();
+            if (this.Service.IsExistCourseCode(viewModel.CourseCode, viewModel.CourseId)) ModelState.AddModelError("CourseCode", string.Format(ErrorMessageHelper.ExistError, "Mã"));
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Save
             var isUpdate = viewModel.IsUpdate;
-            if (!isUpdate) viewModel.CreatedBy = this.UserId;
-            viewModel.LastChanged = this.UserFullName;
+            viewModel.LastChanged = this.UserName;
             var isSuccess = isUpdate
                 ? this.Service.Update(viewModel)
                 : this.Service.Create(viewModel);
@@ -84,6 +81,37 @@ namespace CourseManagement.Controllers
             {
                 IsSuccess = isSuccess,
                 Message = GetDeletedMessage(isSuccess, "Khóa học"),
+            };
+            return Json(jsonResult);
+        }
+
+        [HttpPost]
+        public IActionResult RegisterEnrollment(int courseId)
+        {
+            // Register
+            var isSuccess = this.Service.RegisterEnrollment(courseId, this.UserId);
+
+            // Result
+            var jsonResult = new JsonResultViewModel
+            {
+                IsSuccess = isSuccess,
+                Message = isSuccess ? ErrorMessageHelper.RegistrationSuccessfully : ErrorMessageHelper.RegistrationFailed,
+            };
+            return Json(jsonResult);
+        }
+
+
+        [HttpDelete("{courseId}")]
+        public IActionResult DeleteEnrollment(int courseId)
+        {
+            // Delete
+            var isSuccess = this.Service.DeleteEnrollment(courseId, this.UserId);
+
+            // Result
+            var jsonResult = new JsonResultViewModel
+            {
+                IsSuccess = isSuccess,
+                Message = GetDeletedMessage(isSuccess, "Đăng ký Khóa học"),
             };
             return Json(jsonResult);
         }

@@ -2,7 +2,6 @@
     ViewData["Title"] = "Đăng ký thành viên";
     Layout = "~/Views/Shared/_SmallLayout.cshtml";
 }
-@using CourseManagement.Constants
 @using CourseManagement.ViewModels.Users
 @model UserViewModel
 
@@ -23,7 +22,7 @@
                     </div>
                 </div>
                 <div id="dvEmail" class="input-group mb-1">
-                    <input asp-for="Email" type="email" autocomplete="off" placeholder="Email" class="form-control" />
+                    <input asp-for="Email" type="email" autocomplete="off" class="form-control" placeholder="Email" />
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-envelope"></span>
@@ -31,7 +30,7 @@
                     </div>
                 </div>
                 <div id="dvPassword" class="input-group mb-1">
-                    <input asp-for="Password" type="password" autocomplete="off" class="form-control" placeholder="Mật khẩu">
+                    <input asp-for="Password" type="password" autocomplete="off" class="form-control" maxlength="20" placeholder="Mật khẩu">
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-lock"></span>
@@ -39,7 +38,7 @@
                     </div>
                 </div>
                 <div id="dvConfirmPassword" class="input-group mb-1">
-                    <input asp-for="ConfirmPassword" type="password" autocomplete="off" class="form-control" placeholder="Nhập lại mật khẩu">
+                    <input asp-for="ConfirmPassword" type="password" autocomplete="off" class="form-control" maxlength="20" placeholder="Nhập lại mật khẩu">
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-lock"></span>
@@ -87,6 +86,7 @@
             }
         }
 
+        // Create
         function create() {
             var input = $("#frmRegister").serialize();
             $.ajax({

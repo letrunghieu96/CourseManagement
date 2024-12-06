@@ -1,5 +1,4 @@
-﻿using CourseManagement.Constants;
-using CourseManagement.Domain;
+﻿using CourseManagement.Domain;
 using CourseManagement.Helpers;
 using CourseManagement.Models;
 using CourseManagement.ViewModels;
@@ -9,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace CourseManagement.Controllers
 {
     [Route("[controller]/[action]")]
-    public class ControllerBase<T> : Controller
+    public class ControllerBase : Controller
     {
         protected readonly IConfiguration _config;
         protected readonly IDomainFacade _domainFacade;
@@ -25,26 +24,13 @@ namespace CourseManagement.Controllers
         private void InitConfigSetting()
         {
             var pageLengths = _config.GetValue<string>("PageLengths");
-            if (!string.IsNullOrEmpty(pageLengths)) ConfigConstants.PAGE_LENGTHS = pageLengths.Split(",").Select(length => int.Parse(length)).ToArray();
-
-            //ConfigConstants.ApplicationInfo = new ApplicationInfoModel
-            //{
-            //    CompanyName = _config.GetValue<string>("ApplicationInfo:CompanyName") ?? string.Empty,
-            //    TaxCode = _config.GetValue<string>("ApplicationInfo:TaxCode") ?? string.Empty,
-            //    Address = _config.GetValue<string>("ApplicationInfo:Address") ?? string.Empty,
-            //    PhoneNumber = _config.GetValue<string>("ApplicationInfo:PhoneNumber") ?? string.Empty,
-            //    Director = _config.GetValue<string>("ApplicationInfo:Director") ?? string.Empty,
-            //};
+            if (!string.IsNullOrEmpty(pageLengths)) WebConstants.PAGE_LENGTHS = pageLengths.Split(",").Select(length => int.Parse(length)).ToArray();
+            WebConstants.CLIENT_VERSION = _config.GetValue<string>("ClientVersion") ?? string.Empty;
         }
 
         [HttpGet]
         public async Task<IActionResult> LoadPagination() => await Task.FromResult(PartialView(WebConstants.PARTIAL_VIEW_PAGINATION));
 
-        /// <summary>
-        /// Create errors
-        /// </summary>
-        /// <param name="modelState">Model state</param>
-        /// <returns>Errors</returns>
         protected ErrorMessageList? CreateErrors(ModelStateDictionary? modelState)
         {
             if (modelState == null) return null;
@@ -83,8 +69,7 @@ namespace CourseManagement.Controllers
         protected LoginModel? UserLogin => SessionHelper.GetObjectFromJson<LoginModel>(HttpContext.Session, "UserLogin") ?? null;
         public bool IsUserLogedIn => (this.UserLogin != null);
         public int UserId => (this.UserLogin != null) ? this.UserLogin.UserId : 0;
-        public string UserFullName => (this.UserLogin != null) ? this.UserLogin.FullName : string.Empty;
-        public string UserRole => (this.UserLogin != null) ? this.UserLogin.Role : string.Empty;
-        public bool IsAdmin => (this.UserRole == WebConstants.CONST_ROLE_ADMIN);
+        public string UserName => (this.UserLogin != null) ? this.UserLogin.UserName : string.Empty;
+        public string UserRole => (this.UserLogin != null) ? this.UserLogin.UserRole : string.Empty;
     }
 }

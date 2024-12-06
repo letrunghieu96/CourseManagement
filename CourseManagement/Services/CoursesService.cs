@@ -1,7 +1,7 @@
-﻿using CourseManagement.Constants;
-using CourseManagement.Domain;
+﻿using CourseManagement.Domain;
 using CourseManagement.Domain.Courses;
 using CourseManagement.Domain.Courses.Helpers;
+using CourseManagement.Domain.Enrollments;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Courses;
 
@@ -32,7 +32,7 @@ namespace CourseManagement.Services
             return viewModel;
         }
 
-        public CourseViewModel Get(int courseId)
+        public CourseViewModel Get(int courseId, int userId)
         {
             var viewModel = new CourseViewModel
             {
@@ -44,26 +44,26 @@ namespace CourseManagement.Services
 
             viewModel.CourseCode = model.CourseCode;
             viewModel.CourseName = model.CourseName;
-            viewModel.Duration = model.Duration;
+            viewModel.MainContent = model.MainContent;
+            viewModel.Duration = model.Duration.ToString("#,###");
             viewModel.StartDate = model.StartDate.ToString(WebConstants.DATE_FORMAT_VN);
             viewModel.EndDate = model.EndDate.ToString(WebConstants.DATE_FORMAT_VN);
-            viewModel.Price = model.Price;
-            viewModel.IsActive = (model.IsActive == 1);
-            viewModel.Description = model.Description;
-            viewModel.CreatedBy = model.CreatedBy;
-            viewModel.CreatorName = model.CreatorName;
+            viewModel.Price = model.Price.ToString("#,###");
+            viewModel.Status = (model.Status == 1);
+            viewModel.Lecturer = model.Lecturer;
             viewModel.CreatedAt = model.CreatedAt;
             viewModel.UpdatedAt = model.UpdatedAt;
             viewModel.LastChanged = model.LastChanged;
+            viewModel.IsExistEnrollment = _domainFacade.Enrollments.CheckExistEnrollment(courseId, userId);
 
             return viewModel;
         }
 
-        public bool IsExistCourseCode(int courseId, string? courseCode)
+        public bool IsExistCourseCode(string? courseCode, int? courseId)
         {
             if (string.IsNullOrEmpty(courseCode)) return false;
 
-            var isExist = _domainFacade.Courses.IsExistCourseCode(courseId, courseCode);
+            var isExist = _domainFacade.Courses.IsExistCourseCode(courseCode, courseId);
             return isExist;
         }
 
@@ -73,13 +73,13 @@ namespace CourseManagement.Services
             {
                 CourseCode = viewModel.CourseCode,
                 CourseName = viewModel.CourseName,
-                Duration = viewModel.Duration,
+                MainContent = viewModel.MainContent ?? string.Empty,
+                Duration = int.Parse(viewModel.Duration ?? "0"),
                 StartDate = ConvertDate(viewModel.StartDate) ?? DateTime.Now,
                 EndDate = ConvertDate(viewModel.EndDate) ?? DateTime.Now,
-                Price = viewModel.Price,
-                Description = viewModel.Description ?? string.Empty,
-                IsActive = viewModel.IsActive ? 1 : 0,
-                CreatedBy = viewModel.CreatedBy,
+                Price = decimal.Parse(viewModel.Price ?? "0"),
+                Status = viewModel.Status ? 1 : 0,
+                Lecturer = viewModel.Lecturer,
                 LastChanged = viewModel.LastChanged,
             };
             // Insert
@@ -101,12 +101,13 @@ namespace CourseManagement.Services
             {
                 CourseCode = viewModel.CourseCode,
                 CourseName = viewModel.CourseName,
-                Duration = viewModel.Duration,
+                MainContent = viewModel.MainContent ?? string.Empty,
+                Duration = int.Parse(viewModel.Duration ?? "0"),
                 StartDate = ConvertDate(viewModel.StartDate) ?? DateTime.Now,
                 EndDate = ConvertDate(viewModel.EndDate) ?? DateTime.Now,
-                Price = viewModel.Price,
-                Description = viewModel.Description ?? string.Empty,
-                IsActive = viewModel.IsActive ? 1 : 0,
+                Price = decimal.Parse(viewModel.Price ?? "0"),
+                Status = viewModel.Status ? 1 : 0,
+                Lecturer = viewModel.Lecturer,
                 LastChanged = viewModel.LastChanged,
             };
             // Update
@@ -120,6 +121,30 @@ namespace CourseManagement.Services
         {
             // Delete
             var isSuccess = _domainFacade.Courses.Delete(courseId);
+            if (isSuccess) _domainFacade.Commit();
+
+            return isSuccess;
+        }
+
+        public bool RegisterEnrollment(int courseId, int userId)
+        {
+            var model = new EnrollmentModel
+            {
+                CourseId = courseId,
+                UserId = userId,
+            };
+
+            // Insert
+            var isSuccess = _domainFacade.Enrollments.Insert(model);
+            if (isSuccess) _domainFacade.Commit();
+
+            return isSuccess;
+        }
+
+        public bool DeleteEnrollment(int courseId, int userId)
+        {
+            // Delete
+            var isSuccess = _domainFacade.Enrollments.Delete(courseId, userId);
             if (isSuccess) _domainFacade.Commit();
 
             return isSuccess;

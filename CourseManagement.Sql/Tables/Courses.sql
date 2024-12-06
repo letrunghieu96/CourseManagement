@@ -11,13 +11,13 @@ CREATE TABLE [dbo].[Courses] (
     [CourseId] [int] IDENTITY (1, 1) NOT NULL,
     [CourseCode] [varchar] (20) NOT NULL UNIQUE,
     [CourseName] [nvarchar] (255) NOT NULL DEFAULT (N''),
-    [Description] [nvarchar] (MAX) NOT NULL DEFAULT (N''),
+    [MainContent] [nvarchar] (MAX) NOT NULL DEFAULT (N''),
     [Duration] [int] NOT NULL,
     [StartDate] [date] NOT NULL,
     [EndDate] [date],
     [Price] [decimal] (18, 2) NOT NULL,
-    [IsActive] [bit] NOT NULL DEFAULT (1),
-    [CreatedBy] [int] NOT NULL,
+    [Status] [tinyint] NOT NULL DEFAULT (1),
+    [Lecturer] [nvarchar] (100) NOT NULL DEFAULT (N''),
     [CreatedAt] [datetime] NOT NULL DEFAULT (GETDATE()),
     [UpdatedAt] [datetime],
     [LastChanged] [nvarchar] (100) NOT NULL DEFAULT (N'')
@@ -30,11 +30,4 @@ ALTER TABLE [dbo].[Courses] WITH NOCHECK ADD
     (
         [CourseId]
     ) ON [PRIMARY]
-GO
--- Foreign key
-ALTER TABLE [dbo].[Courses] WITH NOCHECK ADD
-    CONSTRAINT [FK_Courses_Users] FOREIGN KEY
-    (
-        [CreatedBy]
-    ) REFERENCES [dbo].[Users] ([UserId])
 GO

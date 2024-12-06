@@ -58,7 +58,10 @@
     padding-left: 0.25rem;
     font-weight: inherit;
 }
-
+.max-w-150px {
+    width: 150px !important;
+    max-width: 150px !important;
+}
 .max-w-600px {
     width: 600px !important;
     max-width: 600px !important;

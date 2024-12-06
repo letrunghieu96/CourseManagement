@@ -1,5 +1,4 @@
-﻿using CourseManagement.Constants;
-using CourseManagement.Domain;
+﻿using CourseManagement.Domain;
 using CourseManagement.Domain.Users.Helpers;
 using CourseManagement.Helpers;
 using CourseManagement.Services;
@@ -12,7 +11,7 @@ using Newtonsoft.Json;
 namespace CourseManagement.Controllers
 {
     [Authorize]
-    public class UsersController : ControllerBase<UsersController>
+    public class UsersController : ControllerBase
     {
         public UsersController(IConfiguration config, IDomainFacade domainFacade)
             : base(config, domainFacade)
@@ -56,11 +55,11 @@ namespace CourseManagement.Controllers
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Check exist
-            if (this.Service.IsExistEmail(viewModel.UserId, viewModel.Email)) ModelState.AddModelError("Email", string.Format(ErrorMessageHelper.ExistError, "Email"));
+            if (this.Service.IsExistEmail(viewModel.Email, viewModel.UserId)) ModelState.AddModelError("Email", string.Format(ErrorMessageHelper.ExistError, "Email"));
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Save
-            viewModel.LastChanged = this.UserFullName;
+            viewModel.LastChanged = this.UserName;
             var isSuccess = isUpdate
                 ? this.Service.Update(viewModel)
                 : this.Service.Create(viewModel);
@@ -80,7 +79,7 @@ namespace CourseManagement.Controllers
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Change password
-            var isSuccess = this.Service.ChangePassword(viewModel.UserId, viewModel.Password, this.UserFullName);
+            var isSuccess = this.Service.ChangePassword(viewModel.UserId, viewModel.Password, this.UserName);
 
             // Result
             var jsonResult = new JsonResultViewModel

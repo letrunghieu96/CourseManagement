@@ -7,7 +7,7 @@ using System.Data;
 namespace CourseManagement.Domain.Users
 {
     /// <summary>
-    /// User repository interface
+    /// Users repository interface
     /// </summary>
     public interface IUsersRepository
     {
@@ -17,7 +17,7 @@ namespace CourseManagement.Domain.Users
         SearchResult[] Search(SearchCondition condition);
         UserModel CheckLogin(string email, string passwordHash);
         UserModel Get(int userId);
-        bool IsExistEmail(int userId, string email);
+        bool IsExistEmail(string email, int? userId = null);
         int Insert(UserModel model);
         bool Update(int userId, UserModel model);
         bool UpdatePassword(int userId, string passwordHash, string lastChanged);
@@ -69,8 +69,8 @@ namespace CourseManagement.Domain.Users
                 // Parameters
                 var parameters = new DynamicParameters();
                 parameters.Add("SearchWord", condition.SearchWord ?? string.Empty, DbType.String, size: 100);
-                parameters.Add("IsActive", condition.IsActive, DbType.Int16);
-                parameters.Add("Role", condition.Role ?? string.Empty, DbType.String, size: 20);
+                parameters.Add("Status", condition.Status, DbType.Int16);
+                parameters.Add("UserRole", condition.UserRole ?? string.Empty, DbType.String, size: 20);
 
                 // Count
                 var count = _dbConnection.ExecuteScalar<int>(UsersQuery.Count, parameters, transaction: _dbTransaction);
@@ -90,8 +90,8 @@ namespace CourseManagement.Domain.Users
                 // Parameters
                 var parameters = new DynamicParameters();
                 parameters.Add("SearchWord", condition.SearchWord ?? string.Empty, DbType.String, size: 100);
-                parameters.Add("IsActive", condition.IsActive, DbType.Int16);
-                parameters.Add("Role", condition.Role ?? string.Empty, DbType.String, size: 20);
+                parameters.Add("Status", condition.Status, DbType.Int16);
+                parameters.Add("UserRole", condition.UserRole ?? string.Empty, DbType.String, size: 20);
                 parameters.Add("BeginRowNum", condition.BeginRowNum, DbType.Int32);
                 parameters.Add("RowsOfPage", condition.PageLength, DbType.Int32);
                 var orderBy = Enum.TryParse(condition.OrderBy, out UserSortByEnum sortBy) ? (int)sortBy : 0;
@@ -141,14 +141,14 @@ namespace CourseManagement.Domain.Users
             return null;
         }
 
-        public bool IsExistEmail(int userId, string email)
+        public bool IsExistEmail(string email, int? userId)
         {
             try
             {
                 // Parameters
                 var parameters = new DynamicParameters();
-                parameters.Add("UserId", userId, DbType.Int32);
                 parameters.Add("Email", email, DbType.String, size: 255);
+                parameters.Add("UserId", userId, DbType.Int32);
 
                 // Check
                 var count = _dbConnection.QueryFirstOrDefault<int>(UsersQuery.CheckExistEmail, parameters, transaction: _dbTransaction);
@@ -168,11 +168,11 @@ namespace CourseManagement.Domain.Users
             {
                 // Parameters
                 var parameters = new DynamicParameters();
-                parameters.Add("FullName", model.FullName, DbType.String, size: 100);
+                parameters.Add("UserName", model.UserName, DbType.String, size: 100);
                 parameters.Add("Email", model.Email, DbType.String, size: 255);
                 parameters.Add("PasswordHash", model.PasswordHash, DbType.String, size: 255);
-                parameters.Add("Role", model.Role, DbType.String, size: 20);
-                parameters.Add("IsActive", model.IsActive, DbType.Int16);
+                parameters.Add("UserRole", model.UserRole, DbType.String, size: 20);
+                parameters.Add("Status", model.Status, DbType.Int16);
                 parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
 
                 // Insert
@@ -193,10 +193,10 @@ namespace CourseManagement.Domain.Users
                 // Parameters
                 var parameters = new DynamicParameters();
                 parameters.Add("UserId", userId, DbType.Int32);
-                parameters.Add("FullName", model.FullName, DbType.String, size: 100);
+                parameters.Add("UserName", model.UserName, DbType.String, size: 100);
                 parameters.Add("Email", model.Email, DbType.String, size: 255);
-                parameters.Add("Role", model.Role, DbType.String, size: 20);
-                parameters.Add("IsActive", model.IsActive, DbType.Int16);
+                parameters.Add("UserRole", model.UserRole, DbType.String, size: 20);
+                parameters.Add("Status", model.Status, DbType.Int16);
                 parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
 
                 // Update

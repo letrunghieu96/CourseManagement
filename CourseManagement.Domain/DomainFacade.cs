@@ -1,4 +1,5 @@
 ﻿using CourseManagement.Domain.Courses;
+using CourseManagement.Domain.Enrollments;
 using CourseManagement.Domain.Users;
 using System.Data;
 
@@ -11,6 +12,7 @@ namespace CourseManagement.Domain
     {
         IUsersRepository Users { get; }
         ICoursesRepository Courses { get; }
+        IEnrollmentsRepository Enrollments { get; }
 
         void Commit();
         void Rollback();
@@ -25,18 +27,21 @@ namespace CourseManagement.Domain
         IDbTransaction Transaction;
         public IUsersRepository Users { get; }
         public ICoursesRepository Courses { get; }
+        public IEnrollmentsRepository Enrollments { get; }
         #endregion
 
         public DomainFacade(
             IDbTransaction transaction,
             IUsersRepository users,
-            ICoursesRepository courses)
+            ICoursesRepository courses,
+            IEnrollmentsRepository enrollments)
         {
             Transaction = transaction;
 
             // Set repositories
             Users = users;
             Courses = courses;
+            Enrollments = enrollments;
         }
 
         public void Commit()

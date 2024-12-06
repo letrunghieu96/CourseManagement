@@ -7,7 +7,7 @@ using System.Data;
 namespace CourseManagement.Domain.Courses
 {
     /// <summary>
-    /// Course repository interface
+    /// Courses repository interface
     /// </summary>
     public interface ICoursesRepository
     {
@@ -16,14 +16,14 @@ namespace CourseManagement.Domain.Courses
         int Count(SearchCondition condition);
         SearchResult[] Search(SearchCondition condition);
         CourseModel Get(int userId);
-        bool IsExistCourseCode(int courseId, string courseCode);
+        bool IsExistCourseCode(string courseCode, int? courseId = null);
         int Insert(CourseModel model);
         bool Update(int courseId, CourseModel model);
         bool Delete(int courseId);
     }
 
     /// <summary>
-    /// Course repository
+    /// Courses repository
     /// </summary>
     internal class CoursesRepository : RepositoryBase, ICoursesRepository
     {
@@ -71,8 +71,8 @@ namespace CourseManagement.Domain.Courses
                 parameters.Add("StartDateTo", condition.StartDateTo, DbType.Date);
                 parameters.Add("EndDateFrom", condition.EndDateFrom, DbType.Date);
                 parameters.Add("EndDateTo", condition.EndDateTo, DbType.Date);
-                parameters.Add("IsActive", condition.IsActive, DbType.Int16);
-                parameters.Add("CreatorName", condition.CreatorName ?? string.Empty, DbType.String, size: 100);
+                parameters.Add("Status", condition.Status, DbType.Int16);
+                parameters.Add("Lecturer", condition.Lecturer ?? string.Empty, DbType.String, size: 100);
 
                 var count = _dbConnection.ExecuteScalar<int>(CoursesQuery.Count, parameters, transaction: _dbTransaction);
                 return count;
@@ -95,8 +95,8 @@ namespace CourseManagement.Domain.Courses
                 parameters.Add("StartDateTo", condition.StartDateTo, DbType.Date);
                 parameters.Add("EndDateFrom", condition.EndDateFrom, DbType.Date);
                 parameters.Add("EndDateTo", condition.EndDateTo, DbType.Date);
-                parameters.Add("IsActive", condition.IsActive, DbType.Int16);
-                parameters.Add("CreatorName", condition.CreatorName ?? string.Empty, DbType.String, size: 100);
+                parameters.Add("Status", condition.Status, DbType.Int16);
+                parameters.Add("Lecturer", condition.Lecturer ?? string.Empty, DbType.String, size: 100);
                 parameters.Add("BeginRowNum", condition.BeginRowNum, DbType.Int32);
                 parameters.Add("RowsOfPage", condition.PageLength, DbType.Int32);
                 var orderBy = Enum.TryParse(condition.OrderBy, out CourseSortByEnum sortBy) ? (int)sortBy : 0;
@@ -126,14 +126,14 @@ namespace CourseManagement.Domain.Courses
             return null;
         }
 
-        public bool IsExistCourseCode(int courseId, string courseCode)
+        public bool IsExistCourseCode(string courseCode, int? courseId)
         {
             try
             {
                 // Parameters
                 var parameters = new DynamicParameters();
-                parameters.Add("CourseId", courseId, DbType.Int32);
                 parameters.Add("CourseCode", courseCode, DbType.String, size: 20);
+                parameters.Add("CourseId", courseId, DbType.Int32);
 
                 // Check
                 var count = _dbConnection.QueryFirstOrDefault<int>(CoursesQuery.CheckExistCourseCode, parameters, transaction: _dbTransaction);
@@ -154,13 +154,13 @@ namespace CourseManagement.Domain.Courses
                 var parameters = new DynamicParameters();
                 parameters.Add("CourseCode", model.CourseCode, DbType.String, size: 50);
                 parameters.Add("CourseName", model.CourseName, DbType.String, size: 255);
-                parameters.Add("Description", model.Description, DbType.String);
+                parameters.Add("MainContent", model.MainContent, DbType.String);
                 parameters.Add("Duration", model.Duration, DbType.Int32);
                 parameters.Add("StartDate", model.StartDate, DbType.Date);
                 parameters.Add("EndDate", model.EndDate, DbType.Date);
                 parameters.Add("Price", model.Price, DbType.Decimal);
-                parameters.Add("IsActive", model.IsActive, DbType.Int16);
-                parameters.Add("CreatedBy", model.CreatedBy, DbType.Int32);
+                parameters.Add("Status", model.Status, DbType.Int16);
+                parameters.Add("Lecturer", model.Lecturer, DbType.String, size: 100);
                 parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
 
                 // Insert
@@ -183,12 +183,13 @@ namespace CourseManagement.Domain.Courses
                 parameters.Add("CourseId", courseId, DbType.Int32);
                 parameters.Add("CourseCode", model.CourseCode, DbType.String, size: 50);
                 parameters.Add("CourseName", model.CourseName, DbType.String, size: 255);
-                parameters.Add("Description", model.Description, DbType.String);
+                parameters.Add("MainContent", model.MainContent, DbType.String);
                 parameters.Add("Duration", model.Duration, DbType.Int32);
                 parameters.Add("StartDate", model.StartDate, DbType.Date);
                 parameters.Add("EndDate", model.EndDate, DbType.Date);
                 parameters.Add("Price", model.Price, DbType.Decimal);
-                parameters.Add("IsActive", model.IsActive, DbType.Int16);
+                parameters.Add("Status", model.Status, DbType.Int16);
+                parameters.Add("Lecturer", model.Lecturer, DbType.String, size: 100);
                 parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
 
                 // Update

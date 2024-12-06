@@ -2,14 +2,14 @@
 {
     enum UserSortByEnum
     {
-        FullNameAsc = 1,
-        FullNameDesc = 2,
+        UserNameAsc = 1,
+        UserNameDesc = 2,
         EmailAsc = 3,
         EmailDesc = 4,
-        RoleAsc = 5,
-        RoleDesc = 6,
-        IsActiveAsc = 7,
-        IsActiveDesc = 8,
+        UserRoleAsc = 5,
+        UserRoleDesc = 6,
+        StatusAsc = 7,
+        StatusDesc = 8,
         CreatedAtAsc = 9,
         CreatedAtDesc = 10,
     }

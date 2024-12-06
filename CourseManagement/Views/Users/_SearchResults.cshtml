@@ -1,17 +1,16 @@
-﻿@using CourseManagement.Constants
-@using CourseManagement.Domain.Users.Helpers
+﻿@using CourseManagement.Domain.Users.Helpers
 @using CourseManagement.Helpers
 @model SearchResult[]
 
 @if (Model.Length > 0) foreach (var result in Model)
 {
     <tr>
-        <td>@result.FullName</td>
+        <td>@result.UserName</td>
         <td>@result.Email</td>
-        <td>@ValueTextHelper.GetRoleText(result.Role)</td>
+        <td>@ValueTextHelper.GetRoleText(result.UserRole)</td>
         <td>
-            <span class="badge badge-@((result.IsActive == 1) ? "primary" : "warning")">
-                @ValueTextHelper.GetActivityText(result.IsActive.ToString())
+            <span class="badge badge-@((result.Status == 1) ? "primary" : "warning")">
+                @ValueTextHelper.GetStatusText(result.Status.ToString())
             </span>
         </td>
         <td>@result.CreatedAt.ToString(WebConstants.DATE_TIME_FORMAT_VN)</td>
@@ -20,7 +19,7 @@
                 <i class="fas fa-eye"></i>
             </a>
 
-            <button class="btn btn-danger btn-sm" onclick="deleteUser(@result.UserId, '@result.FullName')">
+            <button class="btn btn-danger btn-sm" onclick="deleteUser(@result.UserId, '@result.UserName')">
                 <i class="fas fa-trash"></i>
             </button>
 

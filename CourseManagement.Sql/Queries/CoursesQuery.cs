@@ -24,7 +24,7 @@ namespace CourseManagement.Sql.Queries
                     (
                       Courses.CreatedBy = Users.UserId
                     )
-             WHERE  Courses.IsActive = 1
+             WHERE  Courses.Status = 1
                AND  (Courses.StartDate <= GETDATE())
                AND  (Courses.EndDate >= GETDATE())
           ORDER BY  Courses.CreatedAt
@@ -34,89 +34,80 @@ namespace CourseManagement.Sql.Queries
         @"
             SELECT  COUNT(*)
               FROM  Courses
-                    INNER JOIN Users ON
-                    (
-                      Courses.CreatedBy = Users.UserId
-                    )
              WHERE  (
-                      Courses.CourseCode LIKE '%' + @SearchWord + '%'
+                      CourseCode LIKE '%' + @SearchWord + '%'
                       OR
-                      Courses.CourseName LIKE '%' + @SearchWord + '%'
+                      CourseName LIKE '%' + @SearchWord + '%'
                       OR
                       @SearchWord = ''
                     )
-               AND  (Courses.StartDate >= @StartDateFrom OR @StartDateFrom IS NULL)
-               AND  (Courses.StartDate <= @StartDateTo OR @StartDateTo IS NULL)
-               AND  (Courses.EndDate >= @EndDateFrom OR @EndDateFrom IS NULL)
-               AND  (Courses.EndDate <= @EndDateTo OR @EndDateTo IS NULL)
-               AND  (Courses.IsActive = @IsActive OR @IsActive IS NULL)
-               AND  (Users.FullName LIKE '%' + @CreatorName + '%' OR @CreatorName = '')
+               AND  (Lecturer LIKE '%' + @Lecturer + '%' OR @Lecturer = '')
+               AND  (StartDate >= @StartDateFrom OR @StartDateFrom IS NULL)
+               AND  (StartDate <= @StartDateTo OR @StartDateTo IS NULL)
+               AND  (EndDate >= @EndDateFrom OR @EndDateFrom IS NULL)
+               AND  (EndDate <= @EndDateTo OR @EndDateTo IS NULL)
+               AND  (Status = @Status OR @Status IS NULL)
         ";
 
         public static string Search =>
         @"
-            SELECT  Courses.*,
-                    Users.FullName AS CreatorName
+            SELECT  Courses.*
               FROM  Courses
-                    INNER JOIN Users ON
-                    (
-                      Courses.CreatedBy = Users.UserId
-                    )
              WHERE  (
-                      Courses.CourseCode LIKE '%' + @SearchWord + '%'
+                      CourseCode LIKE '%' + @SearchWord + '%'
                       OR
-                      Courses.CourseName LIKE '%' + @SearchWord + '%'
+                      CourseName LIKE '%' + @SearchWord + '%'
                       OR
                       @SearchWord = ''
                     )
-               AND  (Courses.StartDate >= @StartDateFrom OR @StartDateFrom IS NULL)
-               AND  (Courses.StartDate <= @StartDateTo OR @StartDateTo IS NULL)
-               AND  (Courses.EndDate >= @EndDateFrom OR @EndDateFrom IS NULL)
-               AND  (Courses.EndDate <= @EndDateTo OR @EndDateTo IS NULL)
-               AND  (Courses.IsActive = @IsActive OR @IsActive IS NULL)
-               AND  (Users.FullName LIKE '%' + @CreatorName + '%' OR @CreatorName = '')
+               AND  (Lecturer LIKE '%' + @Lecturer + '%' OR @Lecturer = '')
+               AND  (StartDate >= @StartDateFrom OR @StartDateFrom IS NULL)
+               AND  (StartDate <= @StartDateTo OR @StartDateTo IS NULL)
+               AND  (EndDate >= @EndDateFrom OR @EndDateFrom IS NULL)
+               AND  (EndDate <= @EndDateTo OR @EndDateTo IS NULL)
+               AND  (Status = @Status OR @Status IS NULL)
           ORDER BY
                     CASE @OrderBy
-                      WHEN  '1' THEN Courses.CourseCode
-                      WHEN  '3' THEN Courses.CourseName
-                      WHEN  '15' THEN Users.FullName
+                      WHEN  '1' THEN CourseCode
+                      WHEN  '3' THEN CourseName
+                      WHEN  '13' THEN Lecturer
                       ELSE  '0'
                     END
                       ASC,
                     CASE @OrderBy
-                      WHEN  '2' THEN Courses.CourseCode
-                      WHEN  '4' THEN Courses.CourseName
-                      WHEN  '16' THEN Users.FullName
+                      WHEN  '2' THEN CourseCode
+                      WHEN  '4' THEN CourseName
+                      WHEN  '14' THEN Lecturer
                       ELSE  '0'
                     END
                       DESC,
                     CASE @OrderBy
-                      WHEN  '5' THEN Courses.Duration
-                      WHEN  '11' THEN Courses.IsActive
+                      WHEN  '5' THEN Duration
+                      WHEN  '11' THEN Status
                       ELSE  '0'
                     END
                       ASC,
                     CASE @OrderBy
-                      WHEN  '6' THEN Courses.Duration
-                      WHEN  '12' THEN Courses.IsActive
+                      WHEN  '6' THEN Duration
+                      WHEN  '12' THEN Status
                       ELSE  '0'
                     END
                       DESC,
                     CASE @OrderBy
-                      WHEN  '7' THEN Courses.StartDate
-                      WHEN  '9' THEN Courses.EndDate
-                      WHEN  '13' THEN Courses.CreatedAt
+                      WHEN  '7' THEN StartDate
+                      WHEN  '9' THEN EndDate
+                      WHEN  '13' THEN CreatedAt
                       ELSE  NULL
                     END
                       ASC,
                     CASE @OrderBy
-                      WHEN  '8' THEN Courses.StartDate
-                      WHEN  '10' THEN Courses.EndDate
-                      WHEN  '14' THEN Courses.CreatedAt
+                      WHEN  '8' THEN StartDate
+                      WHEN  '10' THEN EndDate
+                      WHEN  '14' THEN CreatedAt
                       ELSE  NULL
                     END
                       DESC,
-                    Courses.CourseId DESC
+                    CourseId DESC
             OFFSET  @BeginRowNum ROWS
             FETCH NEXT  @RowsOfPage ROWS ONLY
         ";
@@ -130,7 +121,7 @@ namespace CourseManagement.Sql.Queries
 
         public static string CheckExistCourseCode =>
         @"
-            SELECT  CASE WHEN EXISTS (SELECT 1 FROM Courses WHERE CourseCode = @CourseCode AND CourseId <> @CourseId)
+            SELECT  CASE WHEN EXISTS (SELECT 1 FROM Courses WHERE CourseCode = @CourseCode AND (CourseId <> @CourseId OR @CourseId IS NULL))
                         THEN 1
                         ELSE 0
                     END AS Result
@@ -142,13 +133,13 @@ namespace CourseManagement.Sql.Queries
                 (
                     CourseCode
                     ,CourseName
-                    ,Description
+                    ,MainContent
                     ,Duration
                     ,StartDate
                     ,EndDate
-                    ,IsActive
+                    ,Status
                     ,Price
-                    ,CreatedBy
+                    ,Lecturer
                     ,CreatedAt
                     ,LastChanged
                 )
@@ -156,13 +147,13 @@ namespace CourseManagement.Sql.Queries
                 (
                     @CourseCode
                     ,@CourseName
-                    ,@Description
+                    ,@MainContent
                     ,@Duration
                     ,@StartDate
                     ,@EndDate
-                    ,@IsActive
+                    ,@Status
                     ,@Price
-                    ,@CreatedBy
+                    ,@Lecturer
                     ,GETDATE()
                     ,@LastChanged
                 )
@@ -175,12 +166,13 @@ namespace CourseManagement.Sql.Queries
             UPDATE  Courses
                SET  CourseCode = @CourseCode
                     ,CourseName = @CourseName
-                    ,Description = @Description
+                    ,MainContent = @MainContent
                     ,Duration = @Duration
                     ,StartDate = @StartDate
                     ,EndDate = @EndDate
                     ,Price = @Price
-                    ,IsActive = @IsActive
+                    ,Status = @Status
+                    ,Lecturer = @Lecturer
                     ,UpdatedAt = GETDATE()
                     ,LastChanged = @LastChanged
              WHERE  CourseId = @CourseId

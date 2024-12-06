@@ -28,8 +28,8 @@ namespace CourseManagement.Services
             var model = new LoginModel
             {
                 UserId = user.UserId,
-                FullName = user.FullName,
-                Role = user.Role,
+                UserName = user.UserName,
+                UserRole = user.UserRole,
             };
             return model;
         }
@@ -38,11 +38,11 @@ namespace CourseManagement.Services
         {
             var model = new UserModel
             {
-                FullName = viewModel.FullName,
+                UserName = viewModel.FullName,
                 Email = viewModel.Email,
                 PasswordHash = HashPassword(viewModel.Password ?? string.Empty),
-                Role = viewModel.Role,
-                IsActive = 1,
+                UserRole = viewModel.UserRole,
+                Status = 1,
                 LastChanged = "User",
             };
             var userId = _domainFacade.Users.Insert(model);

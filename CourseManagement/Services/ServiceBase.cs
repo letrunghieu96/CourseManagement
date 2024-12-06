@@ -1,5 +1,4 @@
-﻿using CourseManagement.Constants;
-using CourseManagement.Domain;
+﻿using CourseManagement.Domain;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -21,11 +20,6 @@ namespace CourseManagement.Services
             _domainFacade = domainFacade;
         }
 
-        /// <summary>
-        /// Hash password
-        /// </summary>
-        /// <param name="password">Password</param>
-        /// <returns>Encrypted password</returns>
         public string HashPassword(string password)
         {
             using (var hmacsha256 = new HMACSHA256(Encoding.UTF8.GetBytes(_config["SecurityKey"] ?? string.Empty)))
@@ -37,11 +31,6 @@ namespace CourseManagement.Services
             }
         }
 
-        /// <summary>
-        /// Convert date
-        /// </summary>
-        /// <param name="dateString">Date string</param>
-        /// <returns>Date time</returns>
         public static DateTime? ConvertDate(string? dateString)
         {
             if (DateTime.TryParseExact(dateString, WebConstants.DATE_FORMAT_VN, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime result)) return result;
@@ -49,15 +38,9 @@ namespace CourseManagement.Services
             return null;
         }
 
-        /// <summary>
-        /// Is exist email
-        /// </summary>
-        /// <param name="userId">User id</param>
-        /// <param name="email">Email</param>
-        /// <returns>True: if exist, otherwise: False</returns>
-        public bool IsExistEmail(int userId, string email)
+        public bool IsExistEmail(string email, int? userId = null)
         {
-            var isExist = _domainFacade.Users.IsExistEmail(userId, email);
+            var isExist = _domainFacade.Users.IsExistEmail(email, userId);
             return isExist;
         }
     }

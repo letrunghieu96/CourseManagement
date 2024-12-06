@@ -1,6 +1,4 @@
-﻿@using CourseManagement.Constants
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -12,7 +10,7 @@
         <link rel="stylesheet" href="../../plugins/select2/css/select2.min.css">
         <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
         <link rel="stylesheet" href="../../plugins/toastr/toastr.min.css">
-        <link rel="stylesheet" href="../../css/site.css?v=@(ConfigConstants.CLIENT_VERSION)">
+        <link rel="stylesheet" href="../../css/site.css?v=@(WebConstants.CLIENT_VERSION)">
         <!-- Shortcut icon -->
         <link rel="shortcut icon" href="../../dist/img/shortcut-icon.png" />
     </head>
@@ -29,7 +27,7 @@
 
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Logout", WebConstants.CONTROLLER_INDEX)" role="button" title="Đăng xuất">
+                    <a class="nav-link" href="@Url.Action("Logout", "Index")" role="button" title="Đăng xuất">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </li>
@@ -42,10 +40,10 @@
                 <div class="sidebar">
                     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                         <div class="info">
-                        <a class="d-block">@Context.Session.GetString("UserFullName")</a>
+                        <a class="d-block">@Context.Session.GetString("UserName")</a>
                             <a class="d-block">
                                 <span class="badge badge-success">
-                                    @Context.Session.GetString("UserRoleText")
+                                    @Context.Session.GetString("UserRole")
                                 </span>
                             </a>
                         </div>
@@ -79,8 +77,8 @@
     <script src="../../plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
     <script src="../../plugins/toastr/toastr.min.js"></script>
     <script src="../../plugins/jquery-ui/jquery-ui.min.js"></script>
-    <script src="../../js/site.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
-    <script src="../../js/unobtrusive-ajax.js?v=@(ConfigConstants.CLIENT_VERSION)"></script>
+    <script src="../../js/site.js?v=@(WebConstants.CLIENT_VERSION)"></script>
+    <script src="../../js/unobtrusive-ajax.js?v=@(WebConstants.CLIENT_VERSION)"></script>
     <script type="text/javascript">
         $(function () {
             // Select 2

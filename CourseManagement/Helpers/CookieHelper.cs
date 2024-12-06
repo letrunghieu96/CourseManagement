@@ -1,9 +1,9 @@
 ﻿namespace CourseManagement.Helpers
 {
     /// <summary>
-    /// Cookies helper
+    /// Cookie helper
     /// </summary>
-    public static class CookiesHelper
+    public static class CookieHelper
     {
         public static void Set(this IResponseCookies response, string key, string value, int expireTime)
         {

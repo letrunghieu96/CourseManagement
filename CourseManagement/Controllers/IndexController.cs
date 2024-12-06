@@ -1,5 +1,4 @@
-﻿using CourseManagement.Constants;
-using CourseManagement.Domain;
+﻿using CourseManagement.Domain;
 using CourseManagement.Helpers;
 using CourseManagement.Services;
 using CourseManagement.ViewModels;
@@ -7,11 +6,12 @@ using CourseManagement.ViewModels.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
 namespace CourseManagement.Controllers
 {
-    public class IndexController : ControllerBase<IndexController>
+    public class IndexController : ControllerBase
     {
         private readonly int _timeoutForCookieRememberPassword;
         private const string _cookieEmail = "CourseManagement.Email";
@@ -49,13 +49,13 @@ namespace CourseManagement.Controllers
             // Remember sign in information
             if (viewModel.IsRemember)
             {
-                CookiesHelper.Set(HttpContext.Response.Cookies, _cookieEmail, viewModel.Email, _timeoutForCookieRememberPassword);
-                CookiesHelper.Set(HttpContext.Response.Cookies, _cookiePassword, viewModel.Password, _timeoutForCookieRememberPassword);
+                CookieHelper.Set(HttpContext.Response.Cookies, _cookieEmail, viewModel.Email, _timeoutForCookieRememberPassword);
+                CookieHelper.Set(HttpContext.Response.Cookies, _cookiePassword, viewModel.Password, _timeoutForCookieRememberPassword);
             }
             else
             {
-                CookiesHelper.Remove(HttpContext.Response.Cookies, _cookieEmail);
-                CookiesHelper.Remove(HttpContext.Response.Cookies, _cookiePassword);
+                CookieHelper.Remove(HttpContext.Response.Cookies, _cookieEmail);
+                CookieHelper.Remove(HttpContext.Response.Cookies, _cookiePassword);
             }
 
             var userLogin = this.Service.Login(viewModel.Email, viewModel.Password);
@@ -67,17 +67,18 @@ namespace CourseManagement.Controllers
 
             // Save info
             SessionHelper.SetObjectAsJson(HttpContext.Session, "UserLogin", userLogin);
-            HttpContext.Session.SetString("UserFullName", this.UserFullName);
-            HttpContext.Session.SetString("UserRoleText", ValueTextHelper.GetRoleText(this.UserRole));
+            HttpContext.Session.SetString("UserName", this.UserName);
+            HttpContext.Session.SetString("UserRole", ValueTextHelper.GetRoleText(this.UserRole));
 
             // Set claims
             var authClaims = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
             authClaims.AddClaim(new Claim(ClaimTypes.NameIdentifier, this.UserId.ToString()));
             authClaims.AddClaim(new Claim(ClaimTypes.Role, this.UserRole));
-            authClaims.AddClaim(new Claim(ClaimTypes.Name, this.UserFullName));
+            authClaims.AddClaim(new Claim(ClaimTypes.Name, this.UserName));
             HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(authClaims));
 
-            return LocalRedirect(WebConstants.PAGE_HOME);
+            var page = !string.IsNullOrEmpty(viewModel.ReturnUrl) ? viewModel.ReturnUrl : WebConstants.PAGE_HOME;
+            return LocalRedirect(page);
         }
 
         [HttpGet("/Register")]
@@ -92,7 +93,7 @@ namespace CourseManagement.Controllers
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Check exist
-            if (this.Service.IsExistEmail(0, viewModel.Email)) ModelState.AddModelError("Email", string.Format(ErrorMessageHelper.ExistError, "Email"));
+            if (this.Service.IsExistEmail(viewModel.Email)) ModelState.AddModelError("Email", string.Format(ErrorMessageHelper.ExistError, "Email"));
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Create
@@ -107,11 +108,11 @@ namespace CourseManagement.Controllers
             return Json(jsonResult);
         }
 
-
+        [HttpGet("/Logout")]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            HttpContext.Response.Cookies.Delete("CourseManagement.AspNetCore.Session");
+            HttpContext.Response.Cookies.Delete("CourseManagement.AspNetCore.Cookies");
             HttpContext.SignOutAsync();
 
             return RedirectToAction("Index");

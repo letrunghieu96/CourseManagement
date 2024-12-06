@@ -26,14 +26,14 @@ namespace CourseManagement.Sql.Queries
             SELECT  COUNT(UserId)
               FROM  Users
              WHERE  (
-                      FullName LIKE '%' + @SearchWord + '%'
+                      UserName LIKE '%' + @SearchWord + '%'
                       OR
                       Email LIKE '%' + @SearchWord + '%'
                       OR
                       @SearchWord = ''
                     )
-               AND  (Role = @Role OR @Role = '')
-               AND  (IsActive = @IsActive OR @IsActive IS NULL)
+               AND  (UserRole = @UserRole OR @UserRole = '')
+               AND  (Status = @Status OR @Status IS NULL)
         ";
 
         public static string Search =>
@@ -41,36 +41,36 @@ namespace CourseManagement.Sql.Queries
             SELECT  *
               FROM  Users
              WHERE  (
-                      FullName LIKE '%' + @SearchWord + '%'
+                      UserName LIKE '%' + @SearchWord + '%'
                       OR
                       Email LIKE '%' + @SearchWord + '%'
                       OR
                       @SearchWord = ''
                     )
-               AND  (Role = @Role OR @Role = '')
-               AND  (IsActive = @IsActive OR @IsActive IS NULL)
+               AND  (UserRole = @UserRole OR @UserRole = '')
+               AND  (Status = @Status OR @Status IS NULL)
           ORDER BY
                     CASE @OrderBy
-                      WHEN  '1' THEN FullName
+                      WHEN  '1' THEN UserName
                       WHEN  '3' THEN Email
-                      WHEN  '5' THEN Role
+                      WHEN  '5' THEN UserRole
                       ELSE  '0'
                     END
                       ASC,
                     CASE @OrderBy
-                      WHEN  '2' THEN FullName
+                      WHEN  '2' THEN UserName
                       WHEN  '4' THEN Email
-                      WHEN  '6' THEN Role
+                      WHEN  '6' THEN UserRole
                       ELSE  '0'
                     END
                       DESC,
                     CASE @OrderBy
-                      WHEN  '7' THEN IsActive
+                      WHEN  '7' THEN Status
                       ELSE  '0'
                     END
                       ASC,
                     CASE @OrderBy
-                      WHEN  '8' THEN IsActive
+                      WHEN  '8' THEN Status
                       ELSE  '0'
                     END
                       DESC,
@@ -95,7 +95,7 @@ namespace CourseManagement.Sql.Queries
               FROM  Users
              WHERE  Email = @Email
                AND  PasswordHash = @PasswordHash
-               AND  IsActive = 1
+               AND  Status = 1
         ";
 
         public static string Get =>
@@ -107,7 +107,7 @@ namespace CourseManagement.Sql.Queries
 
         public static string CheckExistEmail =>
         @"
-            SELECT  CASE WHEN EXISTS (SELECT 1 FROM Users WHERE Email = @Email AND UserId <> @UserId)
+            SELECT  CASE WHEN EXISTS (SELECT 1 FROM Users WHERE Email = @Email AND (UserId <> @UserId OR @UserId IS NULL))
                         THEN 1
                         ELSE 0
                     END AS Result
@@ -117,21 +117,21 @@ namespace CourseManagement.Sql.Queries
         @"
             INSERT INTO Users
                 (
-                    FullName
+                    UserName
                     ,Email
                     ,PasswordHash
-                    ,Role
-                    ,IsActive
+                    ,UserRole
+                    ,Status
                     ,CreatedAt
                     ,LastChanged
                 )
             VALUES
                 (
-                    @FullName
+                    @UserName
                     ,@Email
                     ,@PasswordHash
-                    ,@Role
-                    ,@IsActive
+                    ,@UserRole
+                    ,@Status
                     ,GETDATE()
                     ,@LastChanged
                 )
@@ -142,10 +142,10 @@ namespace CourseManagement.Sql.Queries
         public static string Update =>
         @"
             UPDATE  Users
-               SET  FullName = @FullName
+               SET  UserName = @UserName
                     ,Email = @Email
-                    ,Role = @Role
-                    ,IsActive = @IsActive
+                    ,UserRole = @UserRole
+                    ,Status = @Status
                     ,UpdatedAt = GETDATE()
                     ,LastChanged = @LastChanged
              WHERE  UserId = @UserId

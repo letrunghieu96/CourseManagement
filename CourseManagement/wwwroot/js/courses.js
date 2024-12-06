@@ -63,3 +63,52 @@ function deleteCourse(courseId, courseCode) {
         }
     });
 }
+
+// Register enrollment
+function registerEnrollment(courseId) {
+    var isOK = confirm(`Bạn có chắc chắn muốn đăng ký Khóa học này không?`);
+    if (isOK === false) return;
+
+    $.ajax({
+        type: "POST",
+        url: `/Courses/RegisterEnrollment`,
+        data: { courseId },
+        success: function (result) {
+            $(document).Toasts('create', {
+                class: result.isSuccess ? 'bg-info' : 'bg-danger',
+                title: 'Thông báo',
+                subtitle: '',
+                body: result.message
+            });
+
+            if (result.isSuccess) setTimeout(function () { location.reload(); }, 3000);
+        },
+        error: function (xhr, exception) {
+            alert('NG');
+        }
+    });
+}
+
+// Delete enrollment
+function deleteEnrollment(enrollmentId) {
+    var isOK = confirm(`Bạn có chắc chắn muốn xóa Khóa học không?`);
+    if (isOK === false) return;
+
+    $.ajax({
+        type: "DELETE",
+        url: `/Courses/DeleteEnrollment/${enrollmentId}`,
+        success: function (result) {
+            $(document).Toasts('create', {
+                class: result.isSuccess ? 'bg-info' : 'bg-danger',
+                title: 'Thông báo',
+                subtitle: '',
+                body: result.message
+            });
+
+            if (result.isSuccess) setTimeout(function () { location.reload(); }, 3000);
+        },
+        error: function (xhr, exception) {
+            alert('NG');
+        }
+    });
+}

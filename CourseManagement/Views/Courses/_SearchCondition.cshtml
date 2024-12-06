@@ -1,8 +1,7 @@
-﻿@using CourseManagement.Constants
-@using CourseManagement.Domain.Courses.Helpers
+﻿@using CourseManagement.Domain.Courses.Helpers
 @using CourseManagement.Helpers
-
 @model SearchCondition
+
 <form
     id="frmSearch"
     data-ajax="true"
@@ -10,27 +9,23 @@
     data-ajax-update="#tblCourses tbody"
     data-ajax-mode="replace"
     data-ajax-success="loadPagination()"
-    data-ajax-url="@Url.Action("Search", WebConstants.CONTROLLER_COURSES)">
+    data-ajax-url="@Url.Action("Search", "Courses")">
 
     <div class="row mb-2">
         <div class="col-md-3 mb-2">
             <label>Từ khóa</label>
-            @Html.TextBoxFor(
-                model => model.SearchWord,
-                new { @class = "form-control form-control-md", @type = "search", @maxlength = 100, @autocomplete = "off" })
+            <input asp-for="SearchWord" type="search" class="form-control form-control-md" autocomplete="off" maxlength="100" />
         </div>
         <div class="col-md-2 mb-2">
             <label>Trạng thái</label>
             @Html.DropDownListFor(
-                model => model.IsActive,
-                new SelectList(ValueTextHelper.GetActivities(), "Value", "Text", Model.IsActive),
+                model => model.Status,
+                new SelectList(ValueTextHelper.GetStatuses(), "Value", "Text", Model.Status),
                 new { @class = "select2", @style = "width: 100%;" })
         </div>
         <div class="col-md-3 mb-2">
-            <label>Người tạo</label>
-            @Html.TextBoxFor(
-                model => model.CreatorName,
-                new { @class = "form-control form-control-md", @type = "search", @maxlength = 100, @autocomplete = "off" })
+            <label>Giảng viên</label>
+            <input asp-for="Lecturer" type="search" class="form-control form-control-md" autocomplete="off" maxlength="100" />
         </div>
     </div>
     <div class="row">
@@ -43,8 +38,8 @@
         </div>
     </div>
 
-    @Html.HiddenFor(model => model.PageLength)
-    @Html.HiddenFor(model => model.PageNo)
-    @Html.HiddenFor(model => model.OrderBy)
+    <input type="hidden" asp-for="PageLength" />
+    <input type="hidden" asp-for="PageNo" />
+    <input type="hidden" asp-for="OrderBy" />
 
 </form>

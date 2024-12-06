@@ -1,5 +1,4 @@
-﻿@using CourseManagement.Constants
-@using CourseManagement.ViewModels
+﻿@using CourseManagement.ViewModels
 @using Newtonsoft.Json;
 @{
     var pagination = JsonConvert.DeserializeObject<PaginationViewModel>(TempData.Peek("paging")?.ToString() ?? string.Empty);
@@ -24,7 +23,7 @@
             <label>
                 @Html.DropDownListFor(
                     model => pagination.PageLength,
-                    new SelectList(ConfigConstants.PAGE_LENGTHS),
+                    new SelectList(WebConstants.PAGE_LENGTHS),
                     new { @id="ddlPageLength", @class="custom-select custom-select-sm form-control form-control-sm", @onchange = "changePageLength()" })
                 @($"Hiển thị từ {pagination.BeginRowNum} đến {pagination.RowsOfPage} của {pagination.Total.ToString("#,###")} kết quả")
             </label>

@@ -93,8 +93,8 @@ function changePassword() {
 }
 
 // Delete
-function deleteUser(userId, fullName) {
-    var isOK = confirm(`Bạn có chắc chắn muốn xóa Người dùng "${fullName}" không?`);
+function deleteUser(userId, userName) {
+    var isOK = confirm(`Bạn có chắc chắn muốn xóa Người dùng "${userName}" không?`);
     if (isOK === false) return;
 
     $.ajax({

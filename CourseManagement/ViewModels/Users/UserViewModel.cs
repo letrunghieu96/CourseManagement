@@ -1,5 +1,4 @@
-﻿using CourseManagement.Constants;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CourseManagement.ViewModels.Users
 {
@@ -8,7 +7,6 @@ namespace CourseManagement.ViewModels.Users
     /// </summary>
     public class UserViewModel
     {
-        #region +Properties
         public int UserId { get; set; }
 
         [Required(ErrorMessage = "Email là trường bắt buộc")]
@@ -32,9 +30,9 @@ namespace CourseManagement.ViewModels.Users
         public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vai trò là trường bắt buộc")]
-        public string Role { get; set; } = "User";
+        public string UserRole { get; set; } = "User";
 
-        public bool IsActive { get; set; } = true;
+        public bool Status { get; set; } = true;
 
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
@@ -42,6 +40,5 @@ namespace CourseManagement.ViewModels.Users
 
         public string? MessageRegister { get; set; }
         public bool IsUpdate => (this.UserId > 0);
-        #endregion
     }
 }

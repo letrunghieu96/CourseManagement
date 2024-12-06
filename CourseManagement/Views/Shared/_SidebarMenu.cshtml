@@ -1,7 +1,7 @@
-﻿@using CourseManagement.Constants
-@{
+﻿@{
     var currentPage = Convert.ToString(ViewContext.HttpContext.Request.Path)!;
 }
+
 <nav class="mt-2" id="menu-item-list">
     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
@@ -33,7 +33,7 @@
                 </li>
             </ul>
         </li>
-        @if (User.IsInRole(WebConstants.CONST_ROLE_ADMIN))
+        @if (User.IsInRole("Admin"))
         {
             <li class="nav-item">
                 <a href="@WebConstants.PAGE_USERS_LIST" class="nav-link @((currentPage == WebConstants.PAGE_USERS_LIST) ? "active": string.Empty)">

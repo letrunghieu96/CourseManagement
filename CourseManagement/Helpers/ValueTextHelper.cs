@@ -4,7 +4,7 @@ namespace CourseManagement.Helpers
 {
     public static class ValueTextHelper
     {
-        public static SelectListItem[] GetRoles(bool hasEmptyItem = true)
+        public static SelectListItem[] GetUserRoles(bool hasEmptyItem = true)
         {
             var results = new List<SelectListItem>();
 
@@ -17,12 +17,12 @@ namespace CourseManagement.Helpers
         }
         public static string GetRoleText(string value)
         {
-            var item = GetRoles(false).FirstOrDefault(item => item.Value == value);
+            var item = GetUserRoles(false).FirstOrDefault(item => item.Value == value);
             var text = (item != null) ? item.Text : string.Empty;
             return text;
         }
 
-        public static SelectListItem[] GetActivities(bool hasEmptyItem = true)
+        public static SelectListItem[] GetStatuses(bool hasEmptyItem = true)
         {
             var results = new List<SelectListItem>();
 
@@ -33,9 +33,9 @@ namespace CourseManagement.Helpers
             results.Add(new SelectListItem { Text = "Vô hiệu hóa", Value = "0", });
             return results.ToArray();
         }
-        public static string GetActivityText(string value)
+        public static string GetStatusText(string value)
         {
-            var item = GetActivities(false).FirstOrDefault(item => item.Value == value);
+            var item = GetStatuses(false).FirstOrDefault(item => item.Value == value);
             var text = (item != null) ? item.Text : string.Empty;
             return text;
         }

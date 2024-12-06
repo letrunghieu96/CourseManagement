@@ -1,14 +1,13 @@
-﻿namespace CourseManagement.Constants
+﻿namespace CourseManagement
 {
     /// <summary>
     /// Web constants
     /// </summary>
     public class WebConstants
     {
-        // Controller
-        public const string CONTROLLER_INDEX = "Index";
-        public const string CONTROLLER_USERS = "Users";
-        public const string CONTROLLER_COURSES = "Courses";
+        // Config
+        public static string CLIENT_VERSION = string.Empty;
+        public static int[] PAGE_LENGTHS = new int[0];
 
         // Url
         public const string PAGE_HOME = "/Home";
@@ -35,9 +34,6 @@
         public const string PARTIAL_VIEW_PAGINATION = "~/Views/Shared/_Pagination.cshtml";
 
         // Value
-        public const string CONST_ROLE_USER = "User";
-        public const string CONST_ROLE_ADMIN = "Admin";
-
         public const string DATE_FORMAT_VN = "dd/MM/yyyy";
         public const string DATE_TIME_FORMAT_VN = "dd/MM/yyyy HH:mm:ss";
     }

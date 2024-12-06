@@ -49,10 +49,10 @@ namespace CourseManagement.Services
             var model = _domainFacade.Users.Get(userId);
             if (model == null) return viewModel;
 
-            viewModel.FullName = model.FullName;
+            viewModel.FullName = model.UserName;
             viewModel.Email = model.Email;
-            viewModel.Role = model.Role;
-            viewModel.IsActive = (model.IsActive == 1);
+            viewModel.UserRole = model.UserRole;
+            viewModel.Status = (model.Status == 1);
             viewModel.CreatedAt = model.CreatedAt;
             viewModel.UpdatedAt = model.UpdatedAt;
             viewModel.LastChanged = model.LastChanged;
@@ -64,11 +64,11 @@ namespace CourseManagement.Services
         {
             var model = new UserModel
             {
-                FullName = viewModel.FullName,
+                UserName = viewModel.FullName,
                 Email = viewModel.Email,
-                Role = viewModel.Role,
+                UserRole = viewModel.UserRole,
                 PasswordHash = HashPassword(viewModel.Password),
-                IsActive = viewModel.IsActive ? 1 : 0,
+                Status = viewModel.Status ? 1 : 0,
                 LastChanged = viewModel.LastChanged,
             };
             var userId = _domainFacade.Users.Insert(model);
@@ -81,10 +81,10 @@ namespace CourseManagement.Services
         {
             var model = new UserModel
             {
-                FullName = viewModel.FullName,
+                UserName = viewModel.FullName,
                 Email = viewModel.Email,
-                Role = viewModel.Role,
-                IsActive = viewModel.IsActive ? 1 : 0,
+                UserRole = viewModel.UserRole,
+                Status = viewModel.Status ? 1 : 0,
                 LastChanged = viewModel.LastChanged,
             };
             var isSuccess = _domainFacade.Users.Update(viewModel.UserId, model);

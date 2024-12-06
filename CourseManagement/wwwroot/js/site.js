@@ -38,7 +38,10 @@ function insertAfter(element, errorMessage) {
 // Set error
 function setError(id, errorMessage) {
     var element = document.getElementById(id);
-    if (!element) return;
+    if (!element) {
+        element = document.getElementById('dv' + id);
+        if (!element) return; 
+    }
 
     if (element.tagName === 'SELECT') {
         $("#select2-" + id + "-container").closest(".select2-selection--single").css("border-color", "#dc3545");
@@ -48,6 +51,16 @@ function setError(id, errorMessage) {
     }
 
     if (element.tagName === 'INPUT') {
+        if (document.getElementById('dv' + id)) {
+            $('#dv' + id + ' > input').css("border-color", "#dc3545");
+            $('#dv' + id + ' div.input-group-text').css("border-color", "#dc3545");
+            insertAfter($('#dv' + id)[0], errorMessage);
+
+            return;
+        }
+    }
+
+    if (element.tagName === 'DIV') {
         if (document.getElementById('dv' + id)) {
             $('#dv' + id + ' > input').css("border-color", "#dc3545");
             $('#dv' + id + ' div.input-group-text').css("border-color", "#dc3545");

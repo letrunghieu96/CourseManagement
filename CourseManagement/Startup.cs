@@ -1,4 +1,4 @@
-﻿using CourseManagement.Domain.Extensions;
+﻿using CourseManagement.Domain;
 using CourseManagement.Middlewares;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Data.SqlClient;
@@ -50,7 +50,7 @@ public class Startup
         services.AddDistributedMemoryCache();
         services.AddSession(option =>
         {
-            option.Cookie.Name = "CourseManagement.AspNetCore.Session";
+            option.Cookie.Name = "CourseManagement.AspNetCore.Cookies";
             option.IdleTimeout = TimeSpan.FromMinutes(_configuration.GetValue<int>("WebTimeOut"));
             option.Cookie.HttpOnly = true;
             option.Cookie.IsEssential = true;

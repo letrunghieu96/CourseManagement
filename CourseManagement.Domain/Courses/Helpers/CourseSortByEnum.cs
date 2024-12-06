@@ -12,11 +12,11 @@
         StartDateDesc = 8,
         EndDateAsc = 9,
         EndDateDesc = 10,
-        IsActiveAsc = 11,
-        IsActiveDesc = 12,
-        CreatedAtAsc = 13,
-        CreatedAtDesc = 14,
-        CreatedByAsc = 15,
-        CreatedByDesc = 16,
+        StatusAsc = 11,
+        StatusDesc = 12,
+        LecturerAsc = 13,
+        LecturerDesc = 14,
+        CreatedAtAsc = 15,
+        CreatedAtDesc = 16,
     }
 }

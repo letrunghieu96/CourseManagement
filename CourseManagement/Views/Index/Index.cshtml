@@ -1,5 +1,4 @@
-﻿@using CourseManagement.Constants
-@using CourseManagement.ViewModels
+﻿@using CourseManagement.ViewModels
 @{
     ViewData["Title"] = "Đăng Nhập";
     Layout = "~/Views/Shared/_SmallLayout.cshtml";
@@ -12,11 +11,11 @@
             <a class="h4"><b>Đăng nhập hệ thống</b></a>
         </div>
         <div class="card-body">
-            @using (Html.BeginForm("Login", WebConstants.CONTROLLER_INDEX, FormMethod.Post, new { id = "frmLogin", enctype = "multipart/form-data" }))
+            @using (Html.BeginForm("Login", "Index", FormMethod.Post, new { id = "frmLogin", enctype = "multipart/form-data" }))
             {
                 <span asp-validation-for="LoginMessage" class="error-message"></span>
                 <div class="input-group mb-2">
-                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @autocomplete = "off", @placeholder = "Email" })
+                    <input asp-for="Email" type="email" class="form-control form-control-md" autocomplete="off" maxlength="100" placeholder="Email" />
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-envelope"></span>
@@ -25,7 +24,7 @@
                 </div>
                 <span asp-validation-for="Email" class="error-message"></span>
                 <div class="input-group mb-2">
-                    @Html.TextBoxFor(model => model.Password, new { @class = "form-control", @type = "password", @autocomplete = "off", @placeholder = "Mật khẩu" })
+                    <input asp-for="Password" type="password" value="@Model.Password" class="form-control form-control-md" autocomplete="off" maxlength="20" placeholder="Mật khẩu" />
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-lock"></span>
