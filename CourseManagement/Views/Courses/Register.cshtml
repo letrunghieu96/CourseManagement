@@ -2,6 +2,7 @@
     ViewData["Title"] = "Thông tin Khóa học";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@using CourseManagement.Helpers
 @using CourseManagement.ViewModels.Courses
 @model CourseViewModel
 
@@ -36,22 +37,27 @@
                         <input asp-for="CourseName" type="text" class="form-control" maxlength="100" autocomplete="off" />
                     </div>
                     <div class="col-md-2">
-                        <label asp-for="Status">Trạng thái</label>
-                        <div class="icheck-primary">
-                            <input type="checkbox" asp-for="Status" class="form-control" />
-                            <label asp-for="Status">Hoạt động</label>
-                        </div>
+                        @if (Model.IsUpdate)
+                        {
+                            <label asp-for="Status">Trạng thái</label>
+                            @Html.DropDownListFor(
+                                model => model.Status,
+                                new SelectList(ValueTextHelper.GetCourseStatuses(false), "Value", "Text", Model.Status),
+                                User.IsInRole("User")
+                                    ? new { @class = "select2", @style = "width: 100%;", @disabled = User.IsInRole("User") }
+                                    : new { @class = "select2", @style = "width: 100%;" })
+                        }
                     </div>
                 </div>
                 <div class="row mb-2">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label asp-for="Duration" class="required">Thời lượng (theo giờ)</label>
-                        <input asp-for="Duration" type="text" class="form-control w-25" autocomplete="off" />
+                        <input asp-for="Duration" type="text" class="form-control currency w-50" data-type="currency" autocomplete="off" />
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label asp-for="StartDate" class="required">Thời gian (bắt đầu)</label>
                         <div class="input-group date max-w-150px" id="dvStartDate" data-target-input="nearest">
-                            <input type="text" id="tbStartDate" name="StartDate" class="form-control datetimepicker-input" value="@Model.StartDate" data-target="#dvStartDate" />
+                            <input type="text" id="tbStartDate" name="StartDate" class="form-control datetimepicker-input" value="@Model.StartDate" data-target="#dvStartDate" autocomplete="off" />
                             <div class="input-group-append" data-target="#dvStartDate" data-toggle="datetimepicker">
                                 <div class="input-group-text">
                                     <i class="fa fa-calendar"></i>
@@ -59,10 +65,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label asp-for="StartDate" class="required">Thời gian (kết thúc)</label>
                         <div class="input-group date max-w-150px" id="dvEndDate" data-target-input="nearest">
-                            <input type="text" id="tbEndDate" name="EndDate" class="form-control datetimepicker-input" value="@Model.EndDate" data-target="#dvEndDate" />
+                            <input type="text" id="tbEndDate" name="EndDate" class="form-control datetimepicker-input" value="@Model.EndDate" data-target="#dvEndDate" autocomplete="off" />
                             <div class="input-group-append" data-target="#dvEndDate" data-toggle="datetimepicker">
                                 <div class="input-group-text">
                                     <i class="fa fa-calendar"></i>
@@ -70,13 +76,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label asp-for="Price" class="required">Giá khóa học</label>
-                        <input asp-for="Price" type="text" class="form-control" autocomplete="off" />
+                        <input asp-for="Price" type="text" class="form-control currency w-75" data-type="currency" autocomplete="off" />
                     </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label asp-for="Lecturer" class="required">Giảng viên</label>
                         <input asp-for="Lecturer" type="text" class="form-control" autocomplete="off" maxlength="100" />
                     </div>
@@ -91,7 +95,7 @@
                 {
                     <div class="row mb-2">
                         <div class="col-md-4">
-                            <label>Được tạo lúc: </label> <span>@Model.CreatedAt</span>
+                            <label>Được tạo lúc: </label> <span>@Model.CreatedAt.ToString(WebConstants.DATE_TIME_FORMAT_VN)</span>
                         </div>
                         @if (Model.UpdatedAt.HasValue)
                         {
@@ -110,15 +114,18 @@
                         {
                             <button id="btnSave" type="button" onclick="save()" class="btn btn-primary">@(Model.IsUpdate ? "Cập nhật" : "Thêm")</button>
                         }
-                        else if (Model.IsExistEnrollment)
+                        else if (Model.IsUpdate)
                         {
-                            <button id="btnDeleteEnrollment" type="button" onclick="deleteEnrollment(@Model.CourseId)" class="btn btn-primary">Hủy đăng ký</button>
+                            if (Model.CanRegister)
+                            {
+                                <button id="btnRegisterEnrollment" type="button" onclick="registerEnrollment(@Model.CourseId)" class="btn btn-outline-success">Đăng ký</button>
+                            }
+                            else if (Model.CanCancel)
+                            {
+                                <button id="btnDeleteEnrollment" type="button" onclick="deleteEnrollment(@Model.CourseId)" class="btn btn-outline-danger">Hủy đăng ký</button>
+                            }
                         }
-                        else
-                        {
-                            <button id="btnRegisterEnrollment" type="button" onclick="registerEnrollment(@Model.CourseId)" class="btn btn-primary">Đăng ký</button>
-                        }
-                        <a href="@WebConstants.PAGE_COURSES_LIST" class="btn btn-primary">Danh sách</a>
+                        <a onclick="history.back()" class="btn btn-primary">Quay lại</a>
                         @Html.HiddenFor(model => model.CourseId)
                     </div>
                 </div>

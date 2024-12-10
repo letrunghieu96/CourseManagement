@@ -17,7 +17,7 @@ namespace CourseManagement.ViewModels.Courses
         [StringLength(100, ErrorMessage = "Tên khóa học có chiều dài tối đa 255 kí tự")]
         public string? CourseName { get; set; }
 
-        [Required(ErrorMessage = "Thời lượng là trường bắt buộc")]
+        [Required(ErrorMessage = "Nội dung chính là trường bắt buộc")]
         public string? MainContent { get; set; }
 
         [Required(ErrorMessage = "Thời lượng là trường bắt buộc")]
@@ -36,11 +36,12 @@ namespace CourseManagement.ViewModels.Courses
         [StringLength(100, ErrorMessage = "Giảng viên có chiều dài tối đa 100 kí tự")]
         public string? Lecturer { get; set; }
 
-        public bool Status { get; set; } = true;
+        public int Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string? LastChanged { get; set; }
-        public bool IsExistEnrollment { get; set; }
+        public bool CanRegister { get; set; }
+        public bool CanCancel { get; set; }
         public bool IsUpdate => (this.CourseId > 0);
     }
 }

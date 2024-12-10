@@ -1,4 +1,5 @@
 ﻿using CourseManagement.Domain;
+using CourseManagement.Domain.Users;
 using CourseManagement.Domain.Users.Helpers;
 using CourseManagement.Helpers;
 using CourseManagement.Services;
@@ -10,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace CourseManagement.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class UsersController : ControllerBase
     {
         public UsersController(IConfiguration config, IDomainFacade domainFacade)
@@ -101,6 +102,44 @@ namespace CourseManagement.Controllers
                 Message = GetDeletedMessage(isSuccess, "Người dùng"),
             };
             return Json(jsonResult);
+        }
+
+        [HttpGet]
+        public IActionResult Edit()
+        {
+            var viewModel = this.Service.Get(this.UserId);
+            return PartialView(WebConstants.PARTIAL_VIEW_USERS_EDIT, viewModel);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateUser(UserViewModel viewModel)
+        {
+            // Validate
+            ModelState.Remove("Password");
+            ModelState.Remove("ConfirmPassword");
+            if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
+
+            // Check exist
+            var id = (this.UserLogin != null) ? this.UserLogin.UserId : 0;
+            if (this.Service.IsExistEmail(viewModel.Email, viewModel.UserId)) ModelState.AddModelError("Email", string.Format(ErrorMessageHelper.ExistError, "Email"));
+            if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
+
+            var model = new UserModel
+            {
+                UserName = viewModel.UserName,
+                Email = viewModel.Email,
+                LastChanged = this.UserName,
+            };
+            var isSuccess = this.Service.UpdateUser(id, model);
+            if (isSuccess) HttpContext.Session.SetString("UserName", this.UserName);
+
+            // Result
+            var result = new
+            {
+                IsSuccess = isSuccess,
+                Message = GetUpdatedMessage(isSuccess, "Thông tin"),
+            };
+            return Json(result);
         }
 
         private UsersService Service => new UsersService(_config, _domainFacade);

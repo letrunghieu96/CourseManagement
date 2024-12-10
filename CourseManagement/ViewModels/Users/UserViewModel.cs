@@ -27,7 +27,7 @@ namespace CourseManagement.ViewModels.Users
 
         [Required(ErrorMessage = "Họ và tên là trường bắt buộc")]
         [StringLength(100, ErrorMessage = "Họ và tên có chiều dài tối đa 100 kí tự")]
-        public string FullName { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vai trò là trường bắt buộc")]
         public string UserRole { get; set; } = "User";

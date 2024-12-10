@@ -16,7 +16,7 @@ namespace CourseManagement.Services
                 TotalCourses = _domainFacade.Courses.GetTotal(),
                 TotalUsers = _domainFacade.Users.GetTotal(),
                 LatestCourses = _domainFacade.Courses.GetTopLatest(5),
-                LatestUsers = _domainFacade.Users.GetTopLatest(5),
+                TopRegistrations = _domainFacade.Courses.GetTopRegistrations(5),
             };
             return model;
         }

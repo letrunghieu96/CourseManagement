@@ -1,0 +1,73 @@
+﻿@using CourseManagement.Domain.Enrollments.Helpers
+@using CourseManagement.Helpers
+@model SearchCondition
+
+<form
+    id="frmSearch"
+    data-ajax="true"
+    data-ajax-method="get"
+    data-ajax-update="#tblEnrollments tbody"
+    data-ajax-mode="replace"
+    data-ajax-success="loadPagination()"
+    data-ajax-url="@Url.Action("Search", "Enrollments")">
+
+    <div class="row mb-2">
+        <div class="col-md-2">
+            <label>Từ ngày</label>
+            <div class="input-group date max-w-150px" id="dvDateFrom" data-target-input="nearest">
+                <input type="text" id="tbDateFrom" name="DateFrom" class="form-control datetimepicker-input" value="@Model.DateFrom" data-target="#dvDateFrom" />
+                <div class="input-group-append" data-target="#dvDateFrom" data-toggle="datetimepicker">
+                    <div class="input-group-text">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label>Đến ngày</label>
+            <div class="input-group date max-w-150px" id="dvDateTo" data-target-input="nearest">
+                <input type="text" id="tbDateTo" name="DateTo" class="form-control datetimepicker-input" value="@Model.DateTo" data-target="#dvDateTo" />
+                <div class="input-group-append" data-target="#dvDateTo" data-toggle="datetimepicker">
+                    <div class="input-group-text">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <label>Khóa học</label>
+            <input asp-for="SearchWord" type="search" class="form-control form-control-md" autocomplete="off" maxlength="100" />
+        </div>
+        <div class="col-md-2 mb-2">
+            <label>Trạng thái</label>
+            @Html.DropDownListFor(
+                model => model.Status,
+                new SelectList(ValueTextHelper.GetCourseStatuses(), "Value", "Text", Model.Status),
+                new { @class = "select2", @style = "width: 100%;" })
+        </div>
+        <div class="col-md-3 mb-2">
+            <label>Giảng viên</label>
+            <input asp-for="Lecturer" type="search" class="form-control form-control-md" autocomplete="off" maxlength="100" />
+        </div>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="row mb-2">
+            <div class="col-md-3 mb-2">
+                <label>Người đăng ký</label>
+                <input asp-for="UserName" type="search" class="form-control form-control-md" autocomplete="off" maxlength="100" />
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-md-6 mb-2">
+            <button type="button" id="btnSearch" class="btn btn-md btn-primary">Tìm kiếm</button>
+            <a id="btnReset" class="btn btn-md btn-link">reset</a>
+        </div>
+    </div>
+
+    <input type="hidden" asp-for="PageLength" />
+    <input type="hidden" asp-for="PageNo" />
+    <input type="hidden" asp-for="OrderBy" />
+
+</form>

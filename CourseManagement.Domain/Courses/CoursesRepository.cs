@@ -13,6 +13,7 @@ namespace CourseManagement.Domain.Courses
     {
         int GetTotal();
         SearchResult[] GetTopLatest(int top);
+        SearchResult[] GetTopRegistrations(int top);
         int Count(SearchCondition condition);
         SearchResult[] Search(SearchCondition condition);
         CourseModel Get(int userId);
@@ -51,6 +52,20 @@ namespace CourseManagement.Domain.Courses
             try
             {
                 var results = _dbConnection.Query<SearchResult>(CoursesQuery.GetTopLatest, new { top }, transaction: _dbTransaction);
+                return results.ToArray();
+            }
+            catch
+            {
+            }
+
+            return new SearchResult[0];
+        }
+
+        public SearchResult[] GetTopRegistrations(int top)
+        {
+            try
+            {
+                var results = _dbConnection.Query<SearchResult>(CoursesQuery.GetTopRegistrations, new { top }, transaction: _dbTransaction);
                 return results.ToArray();
             }
             catch

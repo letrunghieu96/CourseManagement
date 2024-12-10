@@ -6,11 +6,13 @@ using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Courses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace CourseManagement.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "User,Admin")]
     public class CoursesController : ControllerBase
     {
         public CoursesController(IConfiguration config, IDomainFacade domainFacade)
@@ -50,6 +52,13 @@ namespace CourseManagement.Controllers
 
             // Check exist
             viewModel.CourseCode = viewModel.CourseCode?.ToUpper();
+            var regex = new Regex("^[a-zA-Z0-9]+$");
+            if (!regex.IsMatch(viewModel.CourseCode ?? string.Empty))
+            {
+                ModelState.AddModelError("CourseCode", string.Format(ErrorMessageHelper.InvalidParameter, "Mã", viewModel.CourseCode));
+                if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
+            }
+
             if (this.Service.IsExistCourseCode(viewModel.CourseCode, viewModel.CourseId)) ModelState.AddModelError("CourseCode", string.Format(ErrorMessageHelper.ExistError, "Mã"));
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
@@ -100,7 +109,6 @@ namespace CourseManagement.Controllers
             return Json(jsonResult);
         }
 
-
         [HttpDelete("{courseId}")]
         public IActionResult DeleteEnrollment(int courseId)
         {
@@ -111,7 +119,7 @@ namespace CourseManagement.Controllers
             var jsonResult = new JsonResultViewModel
             {
                 IsSuccess = isSuccess,
-                Message = GetDeletedMessage(isSuccess, "Đăng ký Khóa học"),
+                Message = isSuccess ? ErrorMessageHelper.UnsubscribeSuccessfully : ErrorMessageHelper.UnsubscribeFailed,
             };
             return Json(jsonResult);
         }

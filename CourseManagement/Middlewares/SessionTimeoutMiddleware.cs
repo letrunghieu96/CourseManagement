@@ -30,22 +30,24 @@ namespace CourseManagement.Middlewares
             var userLogin = context.Session.GetObjectFromJson<LoginModel>("UserLogin");
             if (userLogin == null)
             {
-                // If the request is AJAX, return 401 error
-                if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsync("SessionExpired");
-                    return;
-                }
-
-                // Redirect the user to the Login page when the request is not AJAX
-                var returnUrl = $"{context.Request.Path.Value}";
                 var controllerRoute = context.Request.RouteValues["controller"] ?? string.Empty;
-                if ((returnUrl.Length > 1)
-                    && (controllerRoute.ToString() != "Index"))
+                if (controllerRoute.ToString() != "Index")
                 {
-                    context.Response.Redirect($"/?ReturnUrl={returnUrl}");
-                    return;
+                    // If the request is AJAX, return 401 error
+                    if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsync("SessionExpired");
+                        return;
+                    }
+
+                    // Redirect the user to the Login page when the request is not AJAX
+                    var returnUrl = $"{context.Request.Path.Value}";
+                    if (returnUrl.Length > 1)
+                    {
+                        context.Response.Redirect($"/?ReturnUrl={returnUrl}");
+                        return;
+                    }
                 }
             }
 

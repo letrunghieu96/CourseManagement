@@ -25,7 +25,7 @@
             }
         </div>
         <div class="card-header pl-2">
-            <h5 class="title">Danh sách Người dùng</h5>
+            <h5 class="text-bold">Danh sách Người dùng</h5>
         </div>
         <div class="card-body pt-2">
             <div class="table-responsive mb-2">
@@ -55,9 +55,6 @@
 <!-- Modal input form -->
 <div class="modal fade" id="modalInputForm" role="dialog">
 </div>
-
-<!-- Modal change password form -->
-@await Html.PartialAsync(WebConstants.PARTIAL_VIEW_USERS_CHANGE_PASSWORD, new ChangePasswordViewModel())
 
 @section scripts {
     <!-- JS -->

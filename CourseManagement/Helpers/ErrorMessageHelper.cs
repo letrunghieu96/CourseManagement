@@ -17,5 +17,8 @@
         public const string WrongLoginInfo = "Sai tên đăng nhập hoặc mật khẩu.";
         public const string NoDataFound = "Không tìm thấy kết quả.";
         public const string ExistError = "{0} đã tồn tại.";
+        public const string InvalidParameter = "{0} [{1}] không hợp lệ.";
+        public const string UnsubscribeSuccessfully = "Hủy đăng ký thành công.";
+        public const string UnsubscribeFailed = "Hủy đăng ký thất bại.";
     }
 }

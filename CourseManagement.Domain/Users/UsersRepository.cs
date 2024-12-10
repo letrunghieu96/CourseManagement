@@ -12,7 +12,6 @@ namespace CourseManagement.Domain.Users
     public interface IUsersRepository
     {
         int GetTotal();
-        SearchResult[] GetTopLatest(int top);
         int Count(SearchCondition condition);
         SearchResult[] Search(SearchCondition condition);
         UserModel CheckLogin(string email, string passwordHash);
@@ -20,6 +19,7 @@ namespace CourseManagement.Domain.Users
         bool IsExistEmail(string email, int? userId = null);
         int Insert(UserModel model);
         bool Update(int userId, UserModel model);
+        bool UpdateUser(int userId, UserModel model);
         bool UpdatePassword(int userId, string passwordHash, string lastChanged);
         bool Delete(int userId);
     }
@@ -46,20 +46,6 @@ namespace CourseManagement.Domain.Users
             }
 
             return 0;
-        }
-
-        public SearchResult[] GetTopLatest(int top)
-        {
-            try
-            {
-                var results = _dbConnection.Query<SearchResult>(UsersQuery.GetTopLatest, new { top }, transaction: _dbTransaction);
-                return results.ToArray();
-            }
-            catch
-            {
-            }
-
-            return new SearchResult[0];
         }
 
         public int Count(SearchCondition condition)
@@ -161,7 +147,6 @@ namespace CourseManagement.Domain.Users
             return false;
         }
 
-
         public int Insert(UserModel model)
         {
             try
@@ -210,6 +195,27 @@ namespace CourseManagement.Domain.Users
             return false;
         }
 
+        public bool UpdateUser(int userId, UserModel model)
+        {
+            try
+            {
+                // Parameters
+                var parameters = new DynamicParameters();
+                parameters.Add("UserId", userId, DbType.Int32);
+                parameters.Add("UserName", model.UserName, DbType.String, size: 100);
+                parameters.Add("Email", model.Email, DbType.String, size: 255);
+                parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
+
+                // Update
+                var rowsAffected = _dbConnection.Execute(UsersQuery.UpdateUser, parameters, transaction: _dbTransaction);
+                return (rowsAffected > 0);
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
 
         public bool UpdatePassword(int userId, string passwordHash, string lastChanged)
         {

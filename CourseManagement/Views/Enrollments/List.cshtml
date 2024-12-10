@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Lịch sử đăng ký";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using CourseManagement.ViewModels.Enrollments
+@model EnrollmentListViewModel
+
+<!-- Page header -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h1 class="text-bold">Lịch sử đăng ký Khóa học</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        <div class="card-header pl-2">
+            @{
+                await Html.RenderPartialAsync(WebConstants.PARTIAL_VIEW_ENROLLMENTS_SEARCH_CONDITION, Model.Condition);
+            }
+        </div>
+        <div class="card-header pl-2">
+            <h5 class="text-bold">Danh sách Khóa học</h5>
+        </div>
+        <div class="card-body pt-2">
+            <div class="table-responsive mb-2">
+                <table class="table table-bordered table-hover" id="tblEnrollments">
+                    <thead>
+                        <tr>
+                            <th class="table-sort" data-sort-by="EnrollmentTime">Ngày đăng ký</th>
+                            <th class="table-sort" data-sort-by="CourseCode">Mã khóa học</th>
+                            <th class="table-sort" data-sort-by="CourseName">Tên khóa học</th>
+                            <th class="table-sort" data-sort-by="Status">Trạng thái</th>
+                            <th class="table-sort" data-sort-by="Price">Giá tiền</th>
+                            <th class="table-sort" data-sort-by="Lecturer">Giảng viên</th>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <th class="table-sort" data-sort-by="UserName">Người đăng ký</th>
+                            }
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @await Html.PartialAsync(WebConstants.PARTIAL_VIEW_ENROLLMENTS_SEARCH_RESULTS, Model.Results)
+                    </tbody>
+                </table>
+            </div>
+            <div class="row" id="dvPagination">
+                @await Html.PartialAsync(WebConstants.PARTIAL_VIEW_PAGINATION)
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <!-- JS -->
+    <script src="../../js/search.js?v=@(WebConstants.CLIENT_VERSION)"></script>
+    <script>
+        avoidFormResubmission();
+    </script>
+}

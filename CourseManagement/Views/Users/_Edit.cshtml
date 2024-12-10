@@ -1,0 +1,35 @@
+﻿@using CourseManagement.ViewModels.Users
+@model UserViewModel
+
+<div class="modal-dialog modal-md">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Thông tin Người dùng</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="frmEditUser">
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <label asp-for="UserName" class="required">Họ tên</label>
+                        <input asp-for="UserName" type="text" class="form-control" maxlength="100" autocomplete="off" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <label asp-for="Email" class="required">Email</label>
+                        <input asp-for="Email" type="email" class="form-control" maxlength="100" autocomplete="off" />
+                    </div>
+                </div>
+                <input type="hidden" asp-for="UserId" />
+            </form>
+        </div>
+        <div class="modal-footer">
+            <a class="btn btn-link btn-sm" data-toggle="modal" data-target="#modalChangePasswordForm">Đổi mật khẩu</a>
+            <button id="btnDelete" type="button" data-dismiss="modal" class="btn btn-secondary">Hủy</button>
+            <button type="button" class="btn btn-primary" onclick="updateUser()">Cập nhật</button>
+        </div>
+    </div>
+</div>

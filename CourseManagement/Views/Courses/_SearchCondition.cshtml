@@ -13,14 +13,60 @@
 
     <div class="row mb-2">
         <div class="col-md-3 mb-2">
-            <label>Từ khóa</label>
+            <label>Khóa học</label>
             <input asp-for="SearchWord" type="search" class="form-control form-control-md" autocomplete="off" maxlength="100" />
         </div>
+        <div class="col-md-2">
+            <label>Bắt đầu (từ)</label>
+            <div class="input-group date max-w-150px" id="dvStartDateFrom" data-target-input="nearest">
+                <input type="text" id="tbStartDateFrom" name="StartDateFrom" class="form-control datetimepicker-input" value="@Model.StartDateFrom" data-target="#dvStartDateFrom" autocomplete="off" />
+                <div class="input-group-append" data-target="#dvStartDateFrom" data-toggle="datetimepicker">
+                    <div class="input-group-text">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label>Bắt đầu (đến)</label>
+            <div class="input-group date max-w-150px" id="dvStartDateTo" data-target-input="nearest">
+                <input type="text" id="tbStartDateTo" name="StartDateTo" class="form-control datetimepicker-input" value="@Model.StartDateTo" data-target="#dvStartDateTo" autocomplete="off" />
+                <div class="input-group-append" data-target="#dvStartDateTo" data-toggle="datetimepicker">
+                    <div class="input-group-text">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label>Kết thúc (từ)</label>
+            <div class="input-group date max-w-150px" id="dvEndDateFrom" data-target-input="nearest">
+                <input type="text" id="tbEndDateFrom" name="EndDateFrom" class="form-control datetimepicker-input" value="@Model.EndDateFrom" data-target="#dvEndDateFrom" autocomplete="off" />
+                <div class="input-group-append" data-target="#dvEndDateFrom" data-toggle="datetimepicker">
+                    <div class="input-group-text">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label>Kết thúc (đến)</label>
+            <div class="input-group date max-w-150px" id="dvEndDateTo" data-target-input="nearest">
+                <input type="text" id="tbdvEndDateTo" name="EndDateTo" class="form-control datetimepicker-input" value="@Model.EndDateTo" data-target="#dvEndDateTo" autocomplete="off" />
+                <div class="input-group-append" data-target="#dvEndDateTo" data-toggle="datetimepicker">
+                    <div class="input-group-text">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2">
         <div class="col-md-2 mb-2">
             <label>Trạng thái</label>
             @Html.DropDownListFor(
                 model => model.Status,
-                new SelectList(ValueTextHelper.GetStatuses(), "Value", "Text", Model.Status),
+                new SelectList(ValueTextHelper.GetCourseStatuses(), "Value", "Text", Model.Status),
                 new { @class = "select2", @style = "width: 100%;" })
         </div>
         <div class="col-md-3 mb-2">
@@ -33,9 +79,12 @@
             <button type="button" id="btnSearch" class="btn btn-md btn-primary">Tìm kiếm</button>
             <a id="btnReset" class="btn btn-md btn-link">reset</a>
         </div>
-        <div class="col-md-6 text-right">
-            <a class="btn btn-primary" href="@WebConstants.PAGE_COURSES_REGISTER">Thêm</a>
-        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-md-6 text-right">
+                <a class="btn btn-primary" href="@WebConstants.PAGE_COURSES_REGISTER">Thêm</a>
+            </div>
+        }
     </div>
 
     <input type="hidden" asp-for="PageLength" />

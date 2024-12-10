@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using CourseManagement.ViewModels.Users
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -27,7 +28,12 @@
 
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                    <a class="nav-link" href="@Url.Action("Logout", "Index")" role="button" title="Đăng xuất">
+                        <a class="nav-link" onclick="editUser()">
+                            <i class="fas fa-user-edit"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Logout", "Index")" role="button" title="Đăng xuất">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </li>
@@ -35,7 +41,7 @@
             </nav>
             <aside class="main-sidebar sidebar-dark-primary elevation-4">
                 <a class="brand-link">
-                    <span class="brand-text font-weight-light" style="color: #007bff;">QUẢN LÝ KHÓA HỌC</span>
+                    <span class="brand-text text-bold">QUẢN LÝ KHÓA HỌC</span>
                 </a>
                 <div class="sidebar">
                     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
@@ -67,6 +73,12 @@
         </div>
     </body>
 
+    <!-- Modal user edit form -->
+    <div class="modal fade" id="modalUserEditForm" role="dialog">
+    </div>
+    <!-- Modal change password form -->
+    @await Html.PartialAsync(WebConstants.PARTIAL_VIEW_USERS_CHANGE_PASSWORD, new ChangePasswordViewModel())
+
     <!-- JS -->
     <script src="../../plugins/jquery/jquery.min.js"></script>
     <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -91,6 +103,102 @@
                 locale: 'vi',
             });
         });
+
+        // Edit user
+        function editUser() {
+            $.ajax({
+                type: "GET",
+                url: "/Users/Edit",
+                success: function (response) {
+                    $("#modalUserEditForm").html(response);
+                    $("#modalUserEditForm").modal("show");
+                }
+            });
+        }
+
+        // Update user
+        function updateUser() {
+            var input = $("#frmEditUser").serialize();
+            $.ajax({
+                type: "POST",
+                url: "/Users/UpdateUser",
+                data: input,
+                success: function (result) {
+                    if ((result.isSuccess === false)
+                        && (result.errors != null)
+                        && (result.errors.length > 0)) {
+
+                        // Clear
+                        clearError();
+
+                        // Set error
+                        for (var index = 0; index < result.errors.length; index++) {
+                            setError(result.errors[index].key, result.errors[index].value);
+                        }
+
+                        return;
+                    }
+
+                    $(document).Toasts('create', {
+                        class: result.isSuccess ? 'bg-info' : 'bg-danger',
+                        title: 'Thông báo',
+                        subtitle: '',
+                        body: result.message
+                    });
+
+                    if (result.isSuccess) {
+                        $("#modalUserEditForm").modal("hide");
+                        setTimeout(function () { location.reload(); }, 3000);
+                    }
+                },
+                error: function (xhr, exception) {
+                    alert('NG');
+                }
+            });
+        }
+
+        // Change password
+        function changePassword() {
+            let input = $("#frmChangePassword").serialize();
+            input += "&userId=" + $("#UserId").val();
+            $.ajax({
+                type: "POST",
+                url: "/Users/ChangePassword",
+                data: input,
+                success: function (result) {
+                    if ((result.isSuccess === false)
+                        && (result.errors != null)
+                        && (result.errors.length > 0)) {
+
+                        // Clear
+                        clearError();
+
+                        // Set error
+                        for (var index = 0; index < result.errors.length; index++) {
+                            setError(result.errors[index].key, result.errors[index].value);
+                        }
+
+                        return;
+                    }
+
+                    $(document).Toasts('create', {
+                        class: result.isSuccess ? 'bg-info' : 'bg-danger',
+                        title: 'Thông báo',
+                        subtitle: '',
+                        body: result.message
+                    });
+
+                    if (result.isSuccess) {
+                        $("#modalChangePasswordForm").modal("hide");
+                        setTimeout(function () { location.reload(); }, 3000);
+                    }
+                },
+                error: function (xhr, exception) {
+                    alert('NG');
+                }
+            });
+        }
     </script>
+
     @RenderSection("scripts", required: false)
 </html>

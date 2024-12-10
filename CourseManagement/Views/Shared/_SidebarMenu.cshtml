@@ -10,8 +10,8 @@
                 <p>Trang chủ</p>
             </a>
         </li>
-        <li class="nav-item sub-menu @(((currentPage == WebConstants.PAGE_COURSES_LIST) || currentPage.StartsWith(WebConstants.PAGE_COURSES_REGISTER)) ? "menu-is-opening menu-open" : string.Empty)">
-            <a href="#" class="nav-link submenu-item @(((currentPage == WebConstants.PAGE_COURSES_LIST) || currentPage.StartsWith(WebConstants.PAGE_COURSES_REGISTER)) ? "active" : string.Empty)">
+        <li class="nav-item sub-menu @(((currentPage == WebConstants.PAGE_COURSES_LIST) || currentPage.StartsWith(WebConstants.PAGE_COURSES_REGISTER) || (currentPage == WebConstants.PAGE_ENROLLMENTS_LIST)) ? "menu-is-opening menu-open" : string.Empty)">
+            <a href="#" class="nav-link submenu-item @(((currentPage == WebConstants.PAGE_COURSES_LIST) || currentPage.StartsWith(WebConstants.PAGE_COURSES_REGISTER) || (currentPage == WebConstants.PAGE_ENROLLMENTS_LIST)) ? "active" : string.Empty)">
                 <i class="nav-icon nav-icon fas fa-calendar-alt"></i>
                 <p>
                     Khóa học
@@ -29,6 +29,12 @@
                     <a href="@WebConstants.PAGE_COURSES_REGISTER" class="nav-link @(currentPage.StartsWith(WebConstants.PAGE_COURSES_REGISTER) ? "active": string.Empty)">
                         <i class="fas fa-calendar-check nav-icon"></i>
                         <p>Thông tin Khóa học</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="@WebConstants.PAGE_ENROLLMENTS_LIST" class="nav-link @(currentPage.StartsWith(WebConstants.PAGE_ENROLLMENTS_LIST) ? "active": string.Empty)">
+                        <i class="fas fa-history nav-icon"></i>
+                        <p>Lịch sử đăng ký</p>
                     </a>
                 </li>
             </ul>

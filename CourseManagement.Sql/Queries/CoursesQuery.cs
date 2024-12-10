@@ -17,17 +17,33 @@ namespace CourseManagement.Sql.Queries
         public static string GetTopLatest =>
         @"
             SELECT  TOP (@Top)
-                    Courses.*,
-                    Users.FullName AS CreatorName
+                    Courses.*
               FROM  Courses
-                    INNER JOIN Users ON
+             WHERE  Status = 0
+          ORDER BY  CreatedAt DESC
+        ";
+
+        public static string GetTopRegistrations =>
+        @"
+            WITH RegistrationCount AS (
+                SELECT  COUNT(UserId) AS TotalUsers,
+                        CourseId
+                  FROM  Enrollments
+              GROUP BY  CourseId
+            )
+
+            SELECT  TOP (@Top)
+                    RegistrationCount.CourseId,
+                    Courses.CourseCode,
+                    Courses.CourseName,
+                    Courses.CreatedAt,
+                    RegistrationCount.TotalUsers
+              FROM  RegistrationCount
+                    INNER JOIN Courses ON
                     (
-                      Courses.CreatedBy = Users.UserId
+                      RegistrationCount.CourseId = Courses.CourseId
                     )
-             WHERE  Courses.Status = 1
-               AND  (Courses.StartDate <= GETDATE())
-               AND  (Courses.EndDate >= GETDATE())
-          ORDER BY  Courses.CreatedAt
+          ORDER BY  RegistrationCount.TotalUsers DESC;
         ";
 
         public static string Count =>
@@ -96,14 +112,14 @@ namespace CourseManagement.Sql.Queries
                     CASE @OrderBy
                       WHEN  '7' THEN StartDate
                       WHEN  '9' THEN EndDate
-                      WHEN  '13' THEN CreatedAt
+                      WHEN  '15' THEN CreatedAt
                       ELSE  NULL
                     END
                       ASC,
                     CASE @OrderBy
                       WHEN  '8' THEN StartDate
                       WHEN  '10' THEN EndDate
-                      WHEN  '14' THEN CreatedAt
+                      WHEN  '16' THEN CreatedAt
                       ELSE  NULL
                     END
                       DESC,

@@ -4,6 +4,7 @@ using CourseManagement.Domain.Courses.Helpers;
 using CourseManagement.Domain.Enrollments;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Courses;
+using System.Globalization;
 
 namespace CourseManagement.Services
 {
@@ -15,6 +16,11 @@ namespace CourseManagement.Services
 
         public CourseListViewModel CreateListViewModel(SearchCondition condition)
         {
+            if (!string.IsNullOrEmpty(condition.StartDateFrom)) condition.StartDateFrom = ConvertDate(condition.StartDateFrom)?.ToString("yyyy-MM-dd");
+            if (!string.IsNullOrEmpty(condition.StartDateTo)) condition.StartDateTo = ConvertDate(condition.StartDateTo)?.ToString("yyyy-MM-dd");
+            if (!string.IsNullOrEmpty(condition.EndDateFrom)) condition.EndDateFrom = ConvertDate(condition.EndDateFrom)?.ToString("yyyy-MM-dd");
+            if (!string.IsNullOrEmpty(condition.EndDateTo)) condition.EndDateTo = ConvertDate(condition.EndDateTo)?.ToString("yyyy-MM-dd");
+
             var total = _domainFacade.Courses.Count(condition);
             var searchResults = _domainFacade.Courses.Search(condition);
             var viewModel = new CourseListViewModel
@@ -49,12 +55,17 @@ namespace CourseManagement.Services
             viewModel.StartDate = model.StartDate.ToString(WebConstants.DATE_FORMAT_VN);
             viewModel.EndDate = model.EndDate.ToString(WebConstants.DATE_FORMAT_VN);
             viewModel.Price = model.Price.ToString("#,###");
-            viewModel.Status = (model.Status == 1);
+            viewModel.Status = model.Status;
             viewModel.Lecturer = model.Lecturer;
             viewModel.CreatedAt = model.CreatedAt;
             viewModel.UpdatedAt = model.UpdatedAt;
             viewModel.LastChanged = model.LastChanged;
-            viewModel.IsExistEnrollment = _domainFacade.Enrollments.CheckExistEnrollment(courseId, userId);
+            if (model.Status == 0)
+            {
+                var isExistEnrollment = _domainFacade.Enrollments.CheckExistEnrollment(courseId, userId);
+                viewModel.CanRegister = !isExistEnrollment;
+                viewModel.CanCancel = isExistEnrollment;
+            }
 
             return viewModel;
         }
@@ -78,7 +89,7 @@ namespace CourseManagement.Services
                 StartDate = ConvertDate(viewModel.StartDate) ?? DateTime.Now,
                 EndDate = ConvertDate(viewModel.EndDate) ?? DateTime.Now,
                 Price = decimal.Parse(viewModel.Price ?? "0"),
-                Status = viewModel.Status ? 1 : 0,
+                Status = 0,
                 Lecturer = viewModel.Lecturer,
                 LastChanged = viewModel.LastChanged,
             };
@@ -102,11 +113,11 @@ namespace CourseManagement.Services
                 CourseCode = viewModel.CourseCode,
                 CourseName = viewModel.CourseName,
                 MainContent = viewModel.MainContent ?? string.Empty,
-                Duration = int.Parse(viewModel.Duration ?? "0"),
+                Duration = int.Parse(viewModel.Duration ?? "0", NumberStyles.AllowThousands),
                 StartDate = ConvertDate(viewModel.StartDate) ?? DateTime.Now,
                 EndDate = ConvertDate(viewModel.EndDate) ?? DateTime.Now,
                 Price = decimal.Parse(viewModel.Price ?? "0"),
-                Status = viewModel.Status ? 1 : 0,
+                Status = viewModel.Status,
                 Lecturer = viewModel.Lecturer,
                 LastChanged = viewModel.LastChanged,
             };

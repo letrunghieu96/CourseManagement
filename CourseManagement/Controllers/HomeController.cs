@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CourseManagement.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "User,Admin")]
     public class HomeController : ControllerBase
     {
         public HomeController(IConfiguration config, IDomainFacade domainFacade)

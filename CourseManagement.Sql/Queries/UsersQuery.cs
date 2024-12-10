@@ -14,13 +14,6 @@ namespace CourseManagement.Sql.Queries
               FROM  Users
         ";
 
-        public static string GetTopLatest =>
-        @"
-            SELECT  TOP (@Top) *
-              FROM  Users
-          ORDER BY  CreatedAt DESC
-        ";
-
         public static string Count =>
         @"
             SELECT  COUNT(UserId)
@@ -146,6 +139,16 @@ namespace CourseManagement.Sql.Queries
                     ,Email = @Email
                     ,UserRole = @UserRole
                     ,Status = @Status
+                    ,UpdatedAt = GETDATE()
+                    ,LastChanged = @LastChanged
+             WHERE  UserId = @UserId
+        ";
+
+        public static string UpdateUser =>
+        @"
+            UPDATE  Users
+               SET  UserName = @UserName
+                    ,Email = @Email
                     ,UpdatedAt = GETDATE()
                     ,LastChanged = @LastChanged
              WHERE  UserId = @UserId

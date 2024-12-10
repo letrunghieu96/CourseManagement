@@ -49,7 +49,7 @@ namespace CourseManagement.Services
             var model = _domainFacade.Users.Get(userId);
             if (model == null) return viewModel;
 
-            viewModel.FullName = model.UserName;
+            viewModel.UserName = model.UserName;
             viewModel.Email = model.Email;
             viewModel.UserRole = model.UserRole;
             viewModel.Status = (model.Status == 1);
@@ -64,7 +64,7 @@ namespace CourseManagement.Services
         {
             var model = new UserModel
             {
-                UserName = viewModel.FullName,
+                UserName = viewModel.UserName,
                 Email = viewModel.Email,
                 UserRole = viewModel.UserRole,
                 PasswordHash = HashPassword(viewModel.Password),
@@ -81,7 +81,7 @@ namespace CourseManagement.Services
         {
             var model = new UserModel
             {
-                UserName = viewModel.FullName,
+                UserName = viewModel.UserName,
                 Email = viewModel.Email,
                 UserRole = viewModel.UserRole,
                 Status = viewModel.Status ? 1 : 0,
@@ -106,6 +106,13 @@ namespace CourseManagement.Services
             var isSuccess = _domainFacade.Users.Delete(userId);
             if (isSuccess) _domainFacade.Commit();
 
+            return isSuccess;
+        }
+
+        public bool UpdateUser(int userId, UserModel model)
+        {
+            var isSuccess = _domainFacade.Users.UpdateUser(userId, model);
+            if (isSuccess) _domainFacade.Commit();
             return isSuccess;
         }
     }

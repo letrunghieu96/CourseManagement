@@ -66,7 +66,7 @@ function deleteCourse(courseId, courseCode) {
 
 // Register enrollment
 function registerEnrollment(courseId) {
-    var isOK = confirm(`Bạn có chắc chắn muốn đăng ký Khóa học này không?`);
+    var isOK = confirm(`Bạn có chắc chắn muốn Đăng ký khóa học này không?`);
     if (isOK === false) return;
 
     $.ajax({
@@ -91,7 +91,7 @@ function registerEnrollment(courseId) {
 
 // Delete enrollment
 function deleteEnrollment(enrollmentId) {
-    var isOK = confirm(`Bạn có chắc chắn muốn xóa Khóa học không?`);
+    var isOK = confirm(`Bạn có chắc chắn muốn Hủy đăng ký khóa học không?`);
     if (isOK === false) return;
 
     $.ajax({

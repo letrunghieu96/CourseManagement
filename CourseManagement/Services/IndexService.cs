@@ -38,7 +38,7 @@ namespace CourseManagement.Services
         {
             var model = new UserModel
             {
-                UserName = viewModel.FullName,
+                UserName = viewModel.UserName,
                 Email = viewModel.Email,
                 PasswordHash = HashPassword(viewModel.Password ?? string.Empty),
                 UserRole = viewModel.UserRole,
