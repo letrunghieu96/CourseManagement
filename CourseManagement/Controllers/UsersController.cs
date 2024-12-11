@@ -45,6 +45,7 @@ namespace CourseManagement.Controllers
             return PartialView(WebConstants.PARTIAL_VIEW_USERS_REGISTER, viewModel);
         }
 
+        [HttpPost]
         public IActionResult Save(UserViewModel viewModel)
         {
             var isUpdate = viewModel.IsUpdate;
@@ -74,6 +75,7 @@ namespace CourseManagement.Controllers
             return Json(jsonResult);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public IActionResult ChangePassword(ChangePasswordViewModel viewModel)
         {
@@ -104,6 +106,7 @@ namespace CourseManagement.Controllers
             return Json(jsonResult);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Edit()
         {
@@ -111,6 +114,7 @@ namespace CourseManagement.Controllers
             return PartialView(WebConstants.PARTIAL_VIEW_USERS_EDIT, viewModel);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public IActionResult UpdateUser(UserViewModel viewModel)
         {
@@ -131,7 +135,7 @@ namespace CourseManagement.Controllers
                 LastChanged = this.UserName,
             };
             var isSuccess = this.Service.UpdateUser(id, model);
-            if (isSuccess) HttpContext.Session.SetString("UserName", this.UserName);
+            if (isSuccess) HttpContext.Session.SetString("UserName", viewModel.UserName);
 
             // Result
             var result = new

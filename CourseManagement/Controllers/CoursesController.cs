@@ -6,7 +6,6 @@ using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Courses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 

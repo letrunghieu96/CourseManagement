@@ -1,5 +1,6 @@
 ﻿using CourseManagement.Domain;
 using CourseManagement.Helpers;
+using CourseManagement.Models;
 using CourseManagement.Services;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Users;
@@ -65,17 +66,8 @@ namespace CourseManagement.Controllers
                 return View(WebConstants.VIEW_INDEX, viewModel);
             }
 
-            // Save info
-            SessionHelper.SetObjectAsJson(HttpContext.Session, "UserLogin", userLogin);
-            HttpContext.Session.SetString("UserName", this.UserName);
-            HttpContext.Session.SetString("UserRole", ValueTextHelper.GetRoleText(this.UserRole));
-
-            // Set claims
-            var authClaims = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-            authClaims.AddClaim(new Claim(ClaimTypes.NameIdentifier, this.UserId.ToString()));
-            authClaims.AddClaim(new Claim(ClaimTypes.Role, this.UserRole));
-            authClaims.AddClaim(new Claim(ClaimTypes.Name, this.UserName));
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(authClaims));
+            // Set info
+            SetUserLoginInfo(userLogin);
 
             var page = !string.IsNullOrEmpty(viewModel.ReturnUrl) ? viewModel.ReturnUrl : WebConstants.PAGE_HOME;
             return LocalRedirect(page);
@@ -97,13 +89,27 @@ namespace CourseManagement.Controllers
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Create
-            var isSuccess = this.Service.Create(viewModel);
+            var userId = this.Service.Create(viewModel);
+            var isSuccess = (userId > 0);
+
+            // Set info
+            if (isSuccess)
+            {
+                var userLogin = new LoginModel
+                {
+                    UserId = userId,
+                    UserName = viewModel.UserName,
+                    UserRole = viewModel.UserRole,
+                };
+                SetUserLoginInfo(userLogin);
+            }
 
             // Result
             var jsonResult = new JsonResultViewModel
             {
                 IsSuccess = isSuccess,
                 Message = isSuccess ? ErrorMessageHelper.RegistrationSuccessfully : ErrorMessageHelper.RegistrationFailed,
+                Path = isSuccess ? WebConstants.PAGE_HOME : string.Empty,
             };
             return Json(jsonResult);
         }
@@ -119,9 +125,21 @@ namespace CourseManagement.Controllers
             return RedirectToAction("Index");
         }
 
-        #region +Properties
-        /// <summary>Index work service</summary>
+        private void SetUserLoginInfo(LoginModel model)
+        {
+            // Save info
+            SessionHelper.SetObjectAsJson(HttpContext.Session, "UserLogin", model);
+            HttpContext.Session.SetString("UserName", this.UserName);
+            HttpContext.Session.SetString("UserRole", ValueTextHelper.GetRoleText(this.UserRole));
+
+            // Set claims
+            var authClaims = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            authClaims.AddClaim(new Claim(ClaimTypes.NameIdentifier, this.UserId.ToString()));
+            authClaims.AddClaim(new Claim(ClaimTypes.Role, this.UserRole));
+            authClaims.AddClaim(new Claim(ClaimTypes.Name, this.UserName));
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(authClaims));
+        }
+
         private IndexService Service => new IndexService(_config, _domainFacade);
-        #endregion
     }
 }

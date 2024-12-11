@@ -34,7 +34,7 @@ namespace CourseManagement.Services
             return model;
         }
 
-        public bool Create(UserViewModel viewModel)
+        public int Create(UserViewModel viewModel)
         {
             var model = new UserModel
             {
@@ -46,13 +46,9 @@ namespace CourseManagement.Services
                 LastChanged = "User",
             };
             var userId = _domainFacade.Users.Insert(model);
-            if (userId > 0)
-            {
-                _domainFacade.Commit();
-                return true;
-            }
+            if (userId > 0) _domainFacade.Commit();
 
-            return false;
+            return userId;
         }
     }
 }

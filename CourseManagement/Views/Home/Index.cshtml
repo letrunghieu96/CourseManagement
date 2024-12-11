@@ -1,8 +1,8 @@
-﻿@using CourseManagement.Helpers
-@{
+﻿@{
     ViewData["Title"] = "Trang chủ";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@using CourseManagement.Helpers
 @model HomeModel
 
 <!-- Page header -->
@@ -82,7 +82,10 @@
                     </div>
                 </div>
                 <div class="card-footer clearfix">
-                    <a href="@WebConstants.PAGE_COURSES_REGISTER" class="btn btn-sm btn-primary float-left">Tạo mới</a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="@WebConstants.PAGE_COURSES_REGISTER" class="btn btn-sm btn-primary float-left">Tạo mới</a>
+                    }
                     <a href="@WebConstants.PAGE_COURSES_LIST" class="float-right">Xem tất cả</a>
                 </div>
             </div>
@@ -105,24 +108,24 @@
                             </thead>
                             <tbody>
                                 @if (Model.TopRegistrations.Length > 0) foreach (var result in Model.TopRegistrations)
-                                    {
-                                        <tr>
-                                            <td>@result.CourseCode</td>
-                                            <td>@result.CourseName</td>
-                                            <td>@result.TotalUsers</td>
-                                            <td>
-                                                <span class="badge badge-@((result.Status == 0) ? "warning" : (result.Status == 1) ? "primary" : (result.Status == 2) ? "success" : "danger")">
-                                                    @ValueTextHelper.GetCourseStatusText(result.Status.ToString())
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    }
+                                {
+                                    <tr>
+                                        <td>@result.CourseCode</td>
+                                        <td>@result.CourseName</td>
+                                        <td>@result.TotalUsers</td>
+                                        <td>
+                                            <span class="badge badge-@((result.Status == 0) ? "warning" : (result.Status == 1) ? "primary" : (result.Status == 2) ? "success" : "danger")">
+                                                @ValueTextHelper.GetCourseStatusText(result.Status.ToString())
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <div class="card-footer text-center">
-                    <a href="@WebConstants.PAGE_ENROLLMENTS_LIST">Xem tất cả</a>
+                    <a href="@WebConstants.PAGE_ENROLLMENTS_LIST" class="float-right">Xem tất cả</a>
                 </div>
             </div>
         </div>

@@ -117,7 +117,7 @@
                     });
 
                     if (response.isSuccess) {
-                        setTimeout(function () { location.reload(); }, 3000);
+                        setTimeout(function () { window.location = response.path; }, 3000);
                     }
                 },
                 error: function (xhr, exception) {

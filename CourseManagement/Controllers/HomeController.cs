@@ -20,9 +20,6 @@ namespace CourseManagement.Controllers
             return View(model);
         }
 
-        #region +Properties
-        /// <summary>Index work service</summary>
         private HomeService Service => new HomeService(_config, _domainFacade);
-        #endregion
     }
 }
