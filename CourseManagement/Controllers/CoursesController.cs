@@ -78,7 +78,7 @@ namespace CourseManagement.Controllers
             return Json(jsonResult);
         }
 
-        [HttpDelete("{courseId}")]
+        [HttpDelete("Delete/{courseId}")]
         public IActionResult Delete(int courseId)
         {
             // Delete
@@ -108,7 +108,7 @@ namespace CourseManagement.Controllers
             return Json(jsonResult);
         }
 
-        [HttpDelete("{courseId}")]
+        [HttpDelete("DeleteEnrollment/{courseId}")]
         public IActionResult DeleteEnrollment(int courseId)
         {
             // Delete

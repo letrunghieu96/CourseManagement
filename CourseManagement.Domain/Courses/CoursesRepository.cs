@@ -169,7 +169,9 @@ namespace CourseManagement.Domain.Courses
                 var parameters = new DynamicParameters();
                 parameters.Add("CourseCode", model.CourseCode, DbType.String, size: 50);
                 parameters.Add("CourseName", model.CourseName, DbType.String, size: 255);
+                parameters.Add("CourseImage", model.CourseImage, DbType.String, size: 255);
                 parameters.Add("MainContent", model.MainContent, DbType.String);
+                parameters.Add("CourseFile", model.CourseFile, DbType.String, size: 255);
                 parameters.Add("Duration", model.Duration, DbType.Int32);
                 parameters.Add("StartDate", model.StartDate, DbType.Date);
                 parameters.Add("EndDate", model.EndDate, DbType.Date);
@@ -198,7 +200,9 @@ namespace CourseManagement.Domain.Courses
                 parameters.Add("CourseId", courseId, DbType.Int32);
                 parameters.Add("CourseCode", model.CourseCode, DbType.String, size: 50);
                 parameters.Add("CourseName", model.CourseName, DbType.String, size: 255);
+                parameters.Add("CourseImage", model.CourseImage, DbType.String, size: 255);
                 parameters.Add("MainContent", model.MainContent, DbType.String);
+                parameters.Add("CourseFile", model.CourseFile, DbType.String, size: 255);
                 parameters.Add("Duration", model.Duration, DbType.Int32);
                 parameters.Add("StartDate", model.StartDate, DbType.Date);
                 parameters.Add("EndDate", model.EndDate, DbType.Date);

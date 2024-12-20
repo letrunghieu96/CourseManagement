@@ -42,5 +42,8 @@
         // Value
         public const string DATE_FORMAT_VN = "dd/MM/yyyy";
         public const string DATE_TIME_FORMAT_VN = "dd/MM/yyyy HH:mm:ss";
+        public const string FOLDER_PATH_COURSES = @"Contents\Courses";
+        public const int LIMIT_NUMBER_COURSES_UPLOAD_FILES = 5;
+        public const int LIMIT_SIZE_COURSES_UPLOAD_FILES = 10; // MB
     }
 }

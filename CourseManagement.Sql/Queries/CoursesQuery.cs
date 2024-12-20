@@ -149,7 +149,9 @@ namespace CourseManagement.Sql.Queries
                 (
                     CourseCode
                     ,CourseName
+                    ,CourseImage
                     ,MainContent
+                    ,CourseFile
                     ,Duration
                     ,StartDate
                     ,EndDate
@@ -163,7 +165,9 @@ namespace CourseManagement.Sql.Queries
                 (
                     @CourseCode
                     ,@CourseName
+                    ,@CourseImage
                     ,@MainContent
+                    ,@CourseFile
                     ,@Duration
                     ,@StartDate
                     ,@EndDate
@@ -182,7 +186,9 @@ namespace CourseManagement.Sql.Queries
             UPDATE  Courses
                SET  CourseCode = @CourseCode
                     ,CourseName = @CourseName
+                    ,CourseImage = @CourseImage
                     ,MainContent = @MainContent
+                    ,CourseFile = @CourseFile
                     ,Duration = @Duration
                     ,StartDate = @StartDate
                     ,EndDate = @EndDate

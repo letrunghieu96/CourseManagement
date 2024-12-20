@@ -11,7 +11,7 @@ namespace CourseManagement.Services
     public class ServiceBase
     {
         /// <summary>Configuration interface</summary>
-        private readonly IConfiguration _config;
+        protected readonly IConfiguration _config;
         protected readonly IDomainFacade _domainFacade;
 
         public ServiceBase(IConfiguration config, IDomainFacade domainFacade)

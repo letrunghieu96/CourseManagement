@@ -1,17 +1,33 @@
-﻿using CourseManagement.Domain;
+﻿using Azure;
+using CourseManagement.Domain;
 using CourseManagement.Domain.Courses;
 using CourseManagement.Domain.Courses.Helpers;
 using CourseManagement.Domain.Enrollments;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Courses;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using System.Globalization;
 
 namespace CourseManagement.Services
 {
     public class CoursesService : ServiceBase
     {
+        /// <summary>Upload file extensions</summary>
+        private readonly string[] _uploadImageExtensions;
+        private readonly string[] _uploadFileExtensions;
+        private readonly string _uploadCoursesFolderPath;
+
         public CoursesService(IConfiguration config, IDomainFacade domainFacade) : base(config, domainFacade)
         {
+            _uploadImageExtensions = _config.GetValue<string>("UploadImageExtensions").Split(",");
+            _uploadFileExtensions = _config.GetValue<string>("UploadFileExtensions").Split(",");
+
+#if DEBUG
+            _uploadCoursesFolderPath = WebConstants.FOLDER_PATH_COURSES;
+#else
+            _uploadCoursesFolderPath = Path.Combine(_config.GetValue<string>("PhysicalPath"), WebConstants.FOLDER_PATH_COURSES);
+#endif
         }
 
         public CourseListViewModel CreateListViewModel(SearchCondition condition)
@@ -84,6 +100,7 @@ namespace CourseManagement.Services
             {
                 CourseCode = viewModel.CourseCode,
                 CourseName = viewModel.CourseName,
+                CourseImage = viewModel.CourseImage?.FileName,
                 MainContent = viewModel.MainContent ?? string.Empty,
                 Duration = int.Parse(viewModel.Duration ?? "0"),
                 StartDate = ConvertDate(viewModel.StartDate) ?? DateTime.Now,
