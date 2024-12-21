@@ -2,11 +2,32 @@
 function save() {
     avoidTwoClicks("btnSave");
 
+    var imageSrc = $("#imagePreview")[0].src;
+    $("#hfCourseImage").val(imageSrc);
     var input = $("#frmInput").serialize();
+
+    var formData = new FormData();
+
+    // Lấy file từ input file
+    var fileInput = $("#CourseImage")[0].files[0];
+    if (fileInput) {
+        formData.append("CourseImage", fileInput); // Thêm file vào FormData
+    }
+
+    // Lấy dữ liệu từ form (dạng serialize)
+    var serializedData = $("#frmInput").serializeArray(); // Lấy dữ liệu thành mảng
+
+    // Duyệt qua từng cặp key-value và thêm vào FormData
+    $.each(serializedData, function (index, field) {
+        formData.append(field.name, field.value);
+    });
+
     $.ajax({
         type: "POST",
         url: "/Courses/Save",
-        data: input,
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function (result) {
             if ((result.isSuccess === false)
                 && (result.errors != null)
@@ -111,4 +132,24 @@ function deleteEnrollment(enrollmentId) {
             alert('NG');
         }
     });
+}
+
+// Display image
+function displayImage() {
+    const fileInput = document.getElementById("CourseImage");
+    if (fileInput.files.length === 0) return;
+
+    const imagePreview = document.getElementById("imagePreview");
+    const file = fileInput.files[0];
+
+    // Image
+    const reader = new FileReader();
+    reader.addEventListener("load", (event) => {
+        imagePreview.src = event.target.result;
+        imagePreview.classList.remove("d-none");
+    });
+    reader.readAsDataURL(file);
+
+    // Image info
+    document.getElementById("imageInfo").innerHTML = '<p class="mb-0"><span>' + file.name + '</span> (<span><strong>' + (file.size / 1024).toFixed(2) + '</strong> KB</span>)</p>';
 }
