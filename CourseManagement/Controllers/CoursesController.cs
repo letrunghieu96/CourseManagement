@@ -1,12 +1,14 @@
 ﻿using CourseManagement.Domain;
 using CourseManagement.Domain.Courses.Helpers;
 using CourseManagement.Helpers;
+using CourseManagement.Models;
 using CourseManagement.Services;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Courses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace CourseManagement.Controllers
@@ -45,8 +47,21 @@ namespace CourseManagement.Controllers
         }
 
         [HttpPost]
-        public IActionResult Save(CourseViewModel viewModel)
+        public async Task<IActionResult> Save(CourseViewModel viewModel)
         {
+            // Check file
+            var isUpdate = viewModel.IsUpdate;
+            var uniqueCourseId = HttpContext.Session.GetString("UniqueCourseId");
+            if (string.IsNullOrEmpty(uniqueCourseId))
+            {
+                uniqueCourseId = Guid.NewGuid().ToString("N");
+                HttpContext.Session.SetString("UniqueCourseId", uniqueCourseId);
+            }
+            if (!isUpdate)
+            {
+                var isExistImage = this.Service.IsExistImage(uniqueCourseId);
+                if (!isExistImage) ModelState.AddModelError("CourseImage", string.Format(ErrorMessageHelper.RequiredError, "Ảnh bìa"));
+            }
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Check exist
@@ -62,18 +77,18 @@ namespace CourseManagement.Controllers
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Save
-            var isUpdate = viewModel.IsUpdate;
             viewModel.LastChanged = this.UserName;
+            viewModel.CourseFile = this.Service.GetCourseFile(uniqueCourseId);
             var isSuccess = isUpdate
-                ? this.Service.Update(viewModel)
-                : this.Service.Create(viewModel);
+                ? await this.Service.Update(viewModel)
+                : await this.Service.Create(viewModel, uniqueCourseId);
 
             // Result
             var jsonResult = new JsonResultViewModel
             {
                 IsSuccess = isSuccess,
                 Message = isUpdate ? GetUpdatedMessage(isSuccess, "Khóa học") : GetCreatedMessage(isSuccess, "Khóa học"),
-                Path = isSuccess ?  $"{WebConstants.PAGE_COURSES_REGISTER}/{viewModel.CourseId}" : string.Empty,
+                Path = isSuccess ? $"{WebConstants.PAGE_COURSES_REGISTER}/{viewModel.CourseId}" : string.Empty,
             };
             return Json(jsonResult);
         }
@@ -121,6 +136,71 @@ namespace CourseManagement.Controllers
                 Message = isSuccess ? ErrorMessageHelper.UnsubscribeSuccessfully : ErrorMessageHelper.UnsubscribeFailed,
             };
             return Json(jsonResult);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            var uniqueCourseId = HttpContext.Session.GetString("UniqueCourseId");
+            if (string.IsNullOrEmpty(uniqueCourseId))
+            {
+                uniqueCourseId = Guid.NewGuid().ToString("N");
+                HttpContext.Session.SetString("UniqueCourseId", uniqueCourseId);
+            }
+
+            // Upload image
+            var isSuccess = await this.Service.UploadImage(uniqueCourseId, file);
+            return Json(
+                new {
+                    IsSuccess = isSuccess,
+                    ImageUrl = $"\\{this.Service.GetImageUrl(uniqueCourseId, file.FileName)}",
+                    FileName = file.FileName,
+                });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadFiles(IFormFile[] files)
+        {
+            var uniqueCourseId = HttpContext.Session.GetString("UniqueCourseId");
+            if (string.IsNullOrEmpty(uniqueCourseId))
+            {
+                uniqueCourseId = Guid.NewGuid().ToString("N");
+                HttpContext.Session.SetString("UniqueCourseId", uniqueCourseId);
+            }
+
+            // Upload files
+            var isSuccess = await this.Service.UploadFiles(uniqueCourseId, files);
+            return Json(
+                new
+                {
+                    IsSuccess = isSuccess,
+                    CourseId = uniqueCourseId,
+                    FileNames = this.Service.GetFileNames(uniqueCourseId).Select(fileName => fileName),
+                });
+        }
+
+        [HttpDelete]
+        public IActionResult DeleteFile(string courseId, string fileName)
+        {
+            // Delete
+            var isSuccess = this.Service.DeleteFile(courseId, fileName);
+            return Json(
+                new
+                {
+                    IsSuccess = isSuccess,
+                    CourseId = courseId,
+                    FileNames = this.Service.GetFileNames(courseId).Select(fileName => fileName),
+                });
+        }
+
+        [HttpGet]
+        public IActionResult DownloadFile(string courseId, string fileName)
+        {
+            var stream = this.Service.GetFile(courseId, fileName);
+            return new FileStreamResult(stream, "application/octet-stream")
+            {
+                FileDownloadName = fileName,
+            };
         }
 
         private CoursesService Service => new CoursesService(_config, _domainFacade);

@@ -18,8 +18,8 @@ namespace CourseManagement.Domain.Courses
         SearchResult[] Search(SearchCondition condition);
         CourseModel Get(int userId);
         bool IsExistCourseCode(string courseCode, int? courseId = null);
-        int Insert(CourseModel model);
-        bool Update(int courseId, CourseModel model);
+        Task<int> Insert(CourseModel model);
+        Task<bool> Update(int courseId, CourseModel model);
         bool Delete(int courseId);
     }
 
@@ -161,7 +161,7 @@ namespace CourseManagement.Domain.Courses
             return false;
         }
 
-        public int Insert(CourseModel model)
+        public async Task<int> Insert(CourseModel model)
         {
             try
             {
@@ -169,9 +169,8 @@ namespace CourseManagement.Domain.Courses
                 var parameters = new DynamicParameters();
                 parameters.Add("CourseCode", model.CourseCode, DbType.String, size: 50);
                 parameters.Add("CourseName", model.CourseName, DbType.String, size: 255);
-                parameters.Add("CourseImage", model.CourseImage, DbType.String, size: 255);
+                parameters.Add("FilePath", model.FilePath, DbType.String, size: 255);
                 parameters.Add("MainContent", model.MainContent, DbType.String);
-                parameters.Add("CourseFile", model.CourseFile, DbType.String, size: 255);
                 parameters.Add("Duration", model.Duration, DbType.Int32);
                 parameters.Add("StartDate", model.StartDate, DbType.Date);
                 parameters.Add("EndDate", model.EndDate, DbType.Date);
@@ -181,7 +180,7 @@ namespace CourseManagement.Domain.Courses
                 parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
 
                 // Insert
-                var id = _dbConnection.QueryFirstOrDefault<int>(CoursesQuery.Insert, parameters, transaction: _dbTransaction);
+                var id = await _dbConnection.QueryFirstOrDefaultAsync<int>(CoursesQuery.Insert, parameters, transaction: _dbTransaction);
                 return id;
             }
             catch
@@ -191,7 +190,7 @@ namespace CourseManagement.Domain.Courses
             return 0;
         }
 
-        public bool Update(int courseId, CourseModel model)
+        public async Task<bool> Update(int courseId, CourseModel model)
         {
             try
             {
@@ -200,9 +199,7 @@ namespace CourseManagement.Domain.Courses
                 parameters.Add("CourseId", courseId, DbType.Int32);
                 parameters.Add("CourseCode", model.CourseCode, DbType.String, size: 50);
                 parameters.Add("CourseName", model.CourseName, DbType.String, size: 255);
-                parameters.Add("CourseImage", model.CourseImage, DbType.String, size: 255);
                 parameters.Add("MainContent", model.MainContent, DbType.String);
-                parameters.Add("CourseFile", model.CourseFile, DbType.String, size: 255);
                 parameters.Add("Duration", model.Duration, DbType.Int32);
                 parameters.Add("StartDate", model.StartDate, DbType.Date);
                 parameters.Add("EndDate", model.EndDate, DbType.Date);
@@ -212,7 +209,7 @@ namespace CourseManagement.Domain.Courses
                 parameters.Add("LastChanged", model.LastChanged, DbType.String, size: 100);
 
                 // Update
-                var rowsAffected = _dbConnection.Execute(CoursesQuery.Update, parameters, transaction: _dbTransaction);
+                var rowsAffected = await _dbConnection.ExecuteAsync(CoursesQuery.Update, parameters, transaction: _dbTransaction);
                 return (rowsAffected > 0);
             }
             catch

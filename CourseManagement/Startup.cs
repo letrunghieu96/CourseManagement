@@ -2,6 +2,7 @@
 using CourseManagement.Middlewares;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.FileProviders;
 using System.Data;
 
 /// <summary>
@@ -89,6 +90,13 @@ public class Startup
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
+
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "Contents")),
+            RequestPath = "/Contents"
+        });
+
         app.UseRouting();
         app.UseCors(cors => cors.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 

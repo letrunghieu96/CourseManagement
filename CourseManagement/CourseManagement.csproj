@@ -14,4 +14,8 @@
     <ProjectReference Include="..\CourseManagement.Domain\CourseManagement.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contents\" />
+  </ItemGroup>
+
 </Project>

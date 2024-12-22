@@ -1,33 +1,124 @@
-﻿// Save
-function save() {
-    avoidTwoClicks("btnSave");
-
-    var imageSrc = $("#imagePreview")[0].src;
-    $("#hfCourseImage").val(imageSrc);
-    var input = $("#frmInput").serialize();
-
+﻿// Upload image
+function uploadImage() {
     var formData = new FormData();
-
-    // Lấy file từ input file
     var fileInput = $("#CourseImage")[0].files[0];
-    if (fileInput) {
-        formData.append("CourseImage", fileInput); // Thêm file vào FormData
-    }
-
-    // Lấy dữ liệu từ form (dạng serialize)
-    var serializedData = $("#frmInput").serializeArray(); // Lấy dữ liệu thành mảng
-
-    // Duyệt qua từng cặp key-value và thêm vào FormData
-    $.each(serializedData, function (index, field) {
-        formData.append(field.name, field.value);
-    });
+    if (fileInput) formData.append("file", fileInput);
 
     $.ajax({
         type: "POST",
-        url: "/Courses/Save",
+        url: "/Courses/UploadImage",
         data: formData,
         processData: false,
         contentType: false,
+        success: function (result) {
+            if (result.isSuccess === false) {
+                alert('thất bại');
+                return;
+            }
+
+            if (result.isSuccess) {
+                const imagePreview = document.getElementById("imagePreview");
+                imagePreview.src = result.imageUrl;
+                document.getElementById("imageInfo").innerHTML = '<p class="mb-0"><span>' + result.fileName + '</span></p>';
+            }
+        },
+        error: function (xhr, exception) {
+            alert('NG');
+        }
+    });
+}
+
+// Download file
+function downloadFile(courseId, fileName) {
+    const link = document.createElement("a");
+    link.href = `/Courses/DownloadFile?courseId=${courseId}&fileName=${encodeURIComponent(fileName)}`;
+    link.download = fileName;
+    link.click();
+}
+
+// Delete file
+function deleteFile(courseId, fileName) {
+    var isOK = confirm(`Bạn có chắc chắn muốn xóa ${fileName}?`);
+    if (isOK === false) return;
+
+    $.ajax({
+        type: "DELETE",
+        url: `/Courses/DeleteFile?courseId=${courseId}&fileName=${encodeURIComponent(fileName)}`,
+        success: function (result) {
+            if (result.isSuccess === false) {
+                alert('thất bại');
+                return;
+            }
+
+            if (result.isSuccess) {
+                var fileList = '';
+                for (var index = 0; index < result.fileNames.length; index++) {
+                    const tagA = `<a class="btn btn-link" onclick="downloadFile('${result.courseId}', '${result.fileNames[index]}')">${result.fileNames[index]}</a>`;
+                    const tagButton = `<a class="btn btn-danger btn-sm" onclick="deleteFile('${result.courseId}', '${result.fileNames[index]}')"><i class="fas fa-trash"></i></a>`;
+                    fileList += tagA + tagButton + '</br>';
+                }
+
+                document.getElementById("fileList").innerHTML = fileList;
+                exportFile();
+            }
+        },
+        error: function (xhr, exception) {
+            alert('NG');
+        }
+    });
+}
+
+// Upload files
+function uploadFiles() {
+    var formData = new FormData();
+    var fileInputs = $("#CourseFile")[0].files;
+
+    if (fileInputs.length > 0) {
+        for (var index = 0; index < fileInputs.length; index++) {
+            formData.append("files", fileInputs[index]);
+        }
+    } 
+
+    $.ajax({
+        type: "POST",
+        url: "/Courses/UploadFiles",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (result) {
+            if (result.isSuccess === false) {
+                alert('thất bại');
+                return;
+            }
+
+            if (result.isSuccess) {
+                var fileList = '';
+                for (var index = 0; index < result.fileNames.length; index++) {
+                    const tagA = `<a class="btn btn-link" onclick="downloadFile('${result.courseId}', '${result.fileNames[index]}')">${result.fileNames[index]}</a>`;
+                    const tagButton = `<a class="btn btn-danger btn-sm" onclick="deleteFile('${result.courseId}', '${result.fileNames[index]}')"><i class="fas fa-trash"></i></a>`;
+                    fileList += tagA + tagButton + '</br>';
+                }
+
+                document.getElementById("fileList").innerHTML = fileList;
+
+                exportFile();
+            }
+        },
+        error: function (xhr, exception) {
+            alert('NG');
+        }
+    });
+}
+
+// Save
+function save() {
+    avoidTwoClicks("btnSave");
+
+    var input = $("#frmInput").serialize();
+    $.ajax({
+        type: "POST",
+        url: "/Courses/Save",
+        data: input,
         success: function (result) {
             if ((result.isSuccess === false)
                 && (result.errors != null)
@@ -132,24 +223,4 @@ function deleteEnrollment(enrollmentId) {
             alert('NG');
         }
     });
-}
-
-// Display image
-function displayImage() {
-    const fileInput = document.getElementById("CourseImage");
-    if (fileInput.files.length === 0) return;
-
-    const imagePreview = document.getElementById("imagePreview");
-    const file = fileInput.files[0];
-
-    // Image
-    const reader = new FileReader();
-    reader.addEventListener("load", (event) => {
-        imagePreview.src = event.target.result;
-        imagePreview.classList.remove("d-none");
-    });
-    reader.readAsDataURL(file);
-
-    // Image info
-    document.getElementById("imageInfo").innerHTML = '<p class="mb-0"><span>' + file.name + '</span> (<span><strong>' + (file.size / 1024).toFixed(2) + '</strong> KB</span>)</p>';
 }

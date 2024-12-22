@@ -8,9 +8,8 @@
         public int CourseId { get; set; }
         public string CourseCode { get; set; }
         public string CourseName { get; set; }
-        public string CourseImage { get; set; }
+        public string FilePath { get; set; }
         public string MainContent { get; set; }
-        public string CourseFile { get; set; }
         public int Duration { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

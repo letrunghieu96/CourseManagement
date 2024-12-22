@@ -16,6 +16,7 @@
         public const string LoggedInFailed = "Đăng nhập thất bại.";
         public const string WrongLoginInfo = "Sai tên đăng nhập hoặc mật khẩu.";
         public const string NoDataFound = "Không tìm thấy kết quả.";
+        public const string RequiredError = "{0} là trường bắt buộc.";
         public const string ExistError = "{0} đã tồn tại.";
         public const string InvalidParameter = "{0} [{1}] không hợp lệ.";
         public const string UnsubscribeSuccessfully = "Hủy đăng ký thành công.";

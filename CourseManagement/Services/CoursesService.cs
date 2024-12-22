@@ -1,12 +1,9 @@
-﻿using Azure;
-using CourseManagement.Domain;
+﻿using CourseManagement.Domain;
 using CourseManagement.Domain.Courses;
 using CourseManagement.Domain.Courses.Helpers;
 using CourseManagement.Domain.Enrollments;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Courses;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using System.Globalization;
 
 namespace CourseManagement.Services
@@ -66,6 +63,7 @@ namespace CourseManagement.Services
 
             viewModel.CourseCode = model.CourseCode;
             viewModel.CourseName = model.CourseName;
+            viewModel.CourseImage = $"\\{GetImage(model.FilePath)}";
             viewModel.MainContent = model.MainContent;
             viewModel.Duration = model.Duration.ToString("#,###");
             viewModel.StartDate = model.StartDate.ToString(WebConstants.DATE_FORMAT_VN);
@@ -94,15 +92,15 @@ namespace CourseManagement.Services
             return isExist;
         }
 
-        public bool Create(CourseViewModel viewModel)
+        public async Task<bool> Create(CourseViewModel viewModel, string uniqueCourseId)
         {
             var model = new CourseModel
             {
                 CourseCode = viewModel.CourseCode,
                 CourseName = viewModel.CourseName,
-                CourseImage = viewModel.CourseImage?.FileName,
+                FilePath = Path.Combine(_uploadCoursesFolderPath, uniqueCourseId),
                 MainContent = viewModel.MainContent ?? string.Empty,
-                Duration = int.Parse(viewModel.Duration ?? "0"),
+                Duration = int.Parse(viewModel.Duration ?? "0", NumberStyles.AllowThousands),
                 StartDate = ConvertDate(viewModel.StartDate) ?? DateTime.Now,
                 EndDate = ConvertDate(viewModel.EndDate) ?? DateTime.Now,
                 Price = decimal.Parse(viewModel.Price ?? "0"),
@@ -111,7 +109,7 @@ namespace CourseManagement.Services
                 LastChanged = viewModel.LastChanged,
             };
             // Insert
-            var courseId = _domainFacade.Courses.Insert(model);
+            var courseId = await _domainFacade.Courses.Insert(model);
             if (courseId > 0)
             {
                 viewModel.CourseId = courseId;
@@ -123,7 +121,7 @@ namespace CourseManagement.Services
             return false;
         }
 
-        public bool Update(CourseViewModel viewModel)
+        public async Task<bool> Update(CourseViewModel viewModel)
         {
             var model = new CourseModel
             {
@@ -139,7 +137,7 @@ namespace CourseManagement.Services
                 LastChanged = viewModel.LastChanged,
             };
             // Update
-            var isSuccess = _domainFacade.Courses.Update(viewModel.CourseId, model);
+            var isSuccess = await _domainFacade.Courses.Update(viewModel.CourseId, model);
             if (isSuccess) _domainFacade.Commit();
 
             return isSuccess;
@@ -176,6 +174,145 @@ namespace CourseManagement.Services
             if (isSuccess) _domainFacade.Commit();
 
             return isSuccess;
+        }
+
+        public async Task<bool> UploadImage(string uniqueCourseId, IFormFile file)
+        {
+            try
+            {
+                if (file == null) return false;
+
+                // Check folder
+                var imageFolderPath = Path.Combine(_uploadCoursesFolderPath, uniqueCourseId, "Image");
+                if (Directory.Exists(imageFolderPath)) DeleteDirectory(imageFolderPath);
+                Directory.CreateDirectory(imageFolderPath);
+
+                // Save file
+                var filePath = Path.Combine(imageFolderPath, file.FileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                return true;
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
+
+        public bool IsExistImage(string uniqueCourseId)
+        {
+            var filePath = Path.Combine(_uploadCoursesFolderPath, uniqueCourseId, "Image");
+            if (!Directory.Exists(filePath)) return false;
+
+            var files = Directory.GetFiles(filePath);
+            return (files.Length > 0);
+        }
+
+        public string GetImage(string filePath)
+        {
+            var fileImagePath = Path.Combine(filePath, "Image");
+            var file = Directory.GetFiles(fileImagePath).FirstOrDefault();
+            return file ?? string.Empty;
+        }
+
+        public string GetImageUrl(string courseId, string courseImage)
+        {
+            var filePath = Path.Combine(_uploadCoursesFolderPath, courseId, "Image", courseImage);
+            return filePath;
+        }
+
+        public string GetCourseFile(string courseId)
+        {
+            if (string.IsNullOrEmpty(courseId)) return string.Empty;
+
+            var filePath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files");
+            var files = Directory.GetFiles(filePath);
+            return (files.Length > 0) ? filePath : string.Empty;
+        }
+
+        public void DeleteDirectory(string directoryPath)
+        {
+            if (Directory.Exists(directoryPath))
+            {
+                foreach (var file in Directory.GetFiles(directoryPath))
+                {
+                    File.Delete(file);
+                }
+
+                foreach (var dir in Directory.GetDirectories(directoryPath))
+                {
+                    DeleteDirectory(dir);
+                }
+
+                Directory.Delete(directoryPath);
+            }
+        }
+
+        public async Task<bool> UploadFiles(string courseId, IFormFile[]? files)
+        {
+            try
+            {
+                // Check folder
+                var filesFolderPath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files");
+                if (!Directory.Exists(filesFolderPath)) Directory.CreateDirectory(filesFolderPath);
+
+                // Save files
+                if (files == null || files.Length == 0) return true;
+                foreach (IFormFile file in files)
+                {
+                    var filePath = Path.Combine(filesFolderPath, file.FileName);
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+                }
+
+                return true;
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
+
+        public string[] GetFileNames(string courseId)
+        {
+            var fileNames = new List<string>();
+            var folderPath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files");
+            foreach (var file in Directory.GetFiles(folderPath))
+            {
+                fileNames.Add(Path.GetFileName(file));
+            }
+
+            return fileNames.ToArray();
+        }
+
+        public FileStream GetFile(string courseId, string fileName)
+        {
+            var filePath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files", fileName);
+            var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            return stream;
+        }
+
+        public bool DeleteFile(string courseId, string fileName)
+        {
+            try
+            {
+                var filePath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files", fileName);
+                File.Delete(filePath);
+
+                return true;
+            }
+            catch
+            {
+            }
+
+            return false;
         }
     }
 }
