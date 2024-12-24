@@ -1,14 +1,12 @@
 ﻿using CourseManagement.Domain;
 using CourseManagement.Domain.Courses.Helpers;
 using CourseManagement.Helpers;
-using CourseManagement.Models;
 using CourseManagement.Services;
 using CourseManagement.ViewModels;
 using CourseManagement.ViewModels.Courses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.IO;
 using System.Text.RegularExpressions;
 
 namespace CourseManagement.Controllers
@@ -43,28 +41,25 @@ namespace CourseManagement.Controllers
         public IActionResult Register(int courseId)
         {
             var viewModel = this.Service.Get(courseId, this.UserId);
+            var uniqueFolderName = (!string.IsNullOrEmpty(viewModel.FolderName)) ? viewModel.FolderName : Guid.NewGuid().ToString("N");
+            HttpContext.Session.SetString("UniqueFolderName", uniqueFolderName);
             return PartialView(WebConstants.PARTIAL_VIEW_COURSES_REGISTER, viewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(CourseViewModel viewModel)
+        public IActionResult Save(CourseViewModel viewModel)
         {
             // Check file
             var isUpdate = viewModel.IsUpdate;
-            var uniqueCourseId = HttpContext.Session.GetString("UniqueCourseId");
-            if (string.IsNullOrEmpty(uniqueCourseId))
-            {
-                uniqueCourseId = Guid.NewGuid().ToString("N");
-                HttpContext.Session.SetString("UniqueCourseId", uniqueCourseId);
-            }
+            var uniqueFolderName = HttpContext.Session.GetString("UniqueFolderName") ?? string.Empty;
             if (!isUpdate)
             {
-                var isExistImage = this.Service.IsExistImage(uniqueCourseId);
+                var isExistImage = this.Service.IsExistImage(uniqueFolderName);
                 if (!isExistImage) ModelState.AddModelError("CourseImage", string.Format(ErrorMessageHelper.RequiredError, "Ảnh bìa"));
             }
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
-            // Check exist
+            // Check exist code
             viewModel.CourseCode = viewModel.CourseCode?.ToUpper();
             var regex = new Regex("^[a-zA-Z0-9]+$");
             if (!regex.IsMatch(viewModel.CourseCode ?? string.Empty))
@@ -72,16 +67,18 @@ namespace CourseManagement.Controllers
                 ModelState.AddModelError("CourseCode", string.Format(ErrorMessageHelper.InvalidParameter, "Mã", viewModel.CourseCode));
                 if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
             }
-
             if (this.Service.IsExistCourseCode(viewModel.CourseCode, viewModel.CourseId)) ModelState.AddModelError("CourseCode", string.Format(ErrorMessageHelper.ExistError, "Mã"));
+
+            // Check date range
+            if (!this.Service.CheckDateRange(viewModel.StartDate, viewModel.EndDate)) ModelState.AddModelError("EndDate", string.Format(ErrorMessageHelper.InvalidParameter, "Kết thúc", viewModel.EndDate));
             if (!ModelState.IsValid) return Json(new JsonResultViewModel { IsSuccess = false, Errors = CreateErrors(ModelState) });
 
             // Save
             viewModel.LastChanged = this.UserName;
-            viewModel.CourseFile = this.Service.GetCourseFile(uniqueCourseId);
             var isSuccess = isUpdate
-                ? await this.Service.Update(viewModel)
-                : await this.Service.Create(viewModel, uniqueCourseId);
+                ? this.Service.Update(viewModel)
+                : this.Service.Create(viewModel, uniqueFolderName);
+            if (isSuccess && !isUpdate) HttpContext.Session.Remove("UniqueFolderName");
 
             // Result
             var jsonResult = new JsonResultViewModel
@@ -93,7 +90,7 @@ namespace CourseManagement.Controllers
             return Json(jsonResult);
         }
 
-        [HttpDelete("Delete/{courseId}")]
+        [HttpDelete("{courseId}")]
         public IActionResult Delete(int courseId)
         {
             // Delete
@@ -123,7 +120,7 @@ namespace CourseManagement.Controllers
             return Json(jsonResult);
         }
 
-        [HttpDelete("DeleteEnrollment/{courseId}")]
+        [HttpDelete("{courseId}")]
         public IActionResult DeleteEnrollment(int courseId)
         {
             // Delete
@@ -141,62 +138,51 @@ namespace CourseManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
-            var uniqueCourseId = HttpContext.Session.GetString("UniqueCourseId");
-            if (string.IsNullOrEmpty(uniqueCourseId))
-            {
-                uniqueCourseId = Guid.NewGuid().ToString("N");
-                HttpContext.Session.SetString("UniqueCourseId", uniqueCourseId);
-            }
-
             // Upload image
-            var isSuccess = await this.Service.UploadImage(uniqueCourseId, file);
-            return Json(
-                new {
-                    IsSuccess = isSuccess,
-                    ImageUrl = $"\\{this.Service.GetImageUrl(uniqueCourseId, file.FileName)}",
-                    FileName = file.FileName,
-                });
+            var uniqueFolderName = HttpContext.Session.GetString("UniqueFolderName") ?? string.Empty;
+            var isSuccess = await this.Service.UploadImage(uniqueFolderName, file);
+            var jsonResult = new
+            {
+                IsSuccess = isSuccess,
+                ImageUrl = this.Service.GetImageUrl(uniqueFolderName, file.FileName),
+                FileName = file.FileName,
+            };
+            return Json(jsonResult);
         }
 
         [HttpPost]
         public async Task<IActionResult> UploadFiles(IFormFile[] files)
         {
-            var uniqueCourseId = HttpContext.Session.GetString("UniqueCourseId");
-            if (string.IsNullOrEmpty(uniqueCourseId))
-            {
-                uniqueCourseId = Guid.NewGuid().ToString("N");
-                HttpContext.Session.SetString("UniqueCourseId", uniqueCourseId);
-            }
-
             // Upload files
-            var isSuccess = await this.Service.UploadFiles(uniqueCourseId, files);
-            return Json(
-                new
-                {
-                    IsSuccess = isSuccess,
-                    CourseId = uniqueCourseId,
-                    FileNames = this.Service.GetFileNames(uniqueCourseId).Select(fileName => fileName),
-                });
+            var uniqueFolderName = HttpContext.Session.GetString("UniqueFolderName") ?? string.Empty;
+            var isSuccess = await this.Service.UploadFiles(uniqueFolderName, files);
+            var jsonResult = new
+            {
+                IsSuccess = isSuccess,
+                FolderName = uniqueFolderName,
+                FileNames = this.Service.GetFileNames(uniqueFolderName).Select(fileName => fileName),
+            };
+            return Json(jsonResult);
         }
 
         [HttpDelete]
-        public IActionResult DeleteFile(string courseId, string fileName)
+        public IActionResult DeleteFile(string folderName, string fileName)
         {
             // Delete
-            var isSuccess = this.Service.DeleteFile(courseId, fileName);
-            return Json(
-                new
-                {
-                    IsSuccess = isSuccess,
-                    CourseId = courseId,
-                    FileNames = this.Service.GetFileNames(courseId).Select(fileName => fileName),
-                });
+            var isSuccess = this.Service.DeleteFile(folderName, fileName);
+            var jsonResult = new
+            {
+                IsSuccess = isSuccess,
+                FolderName = folderName,
+                FileNames = this.Service.GetFileNames(folderName).Select(fileName => fileName),
+            };
+            return Json(jsonResult);
         }
 
         [HttpGet]
-        public IActionResult DownloadFile(string courseId, string fileName)
+        public IActionResult DownloadFile(string folderName, string fileName)
         {
-            var stream = this.Service.GetFile(courseId, fileName);
+            var stream = this.Service.GetFile(folderName, fileName);
             return new FileStreamResult(stream, "application/octet-stream")
             {
                 FileDownloadName = fileName,

@@ -66,3 +66,7 @@
     width: 600px !important;
     max-width: 600px !important;
 }
+.course-image {
+    max-width: 80%;
+    height: auto;
+}

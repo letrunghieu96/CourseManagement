@@ -149,7 +149,7 @@ namespace CourseManagement.Sql.Queries
                 (
                     CourseCode
                     ,CourseName
-                    ,FilePath
+                    ,FolderName
                     ,MainContent
                     ,Duration
                     ,StartDate
@@ -164,7 +164,7 @@ namespace CourseManagement.Sql.Queries
                 (
                     @CourseCode
                     ,@CourseName
-                    ,@FilePath
+                    ,@FolderName
                     ,@MainContent
                     ,@Duration
                     ,@StartDate

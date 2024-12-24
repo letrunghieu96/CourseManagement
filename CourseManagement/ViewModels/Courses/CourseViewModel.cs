@@ -17,12 +17,12 @@ namespace CourseManagement.ViewModels.Courses
         [StringLength(100, ErrorMessage = "Tên khóa học có chiều dài tối đa 255 kí tự")]
         public string? CourseName { get; set; }
 
-        public string? CourseImage { get; set; }
-
         [Required(ErrorMessage = "Nội dung chính là trường bắt buộc")]
         public string? MainContent { get; set; }
 
-        public string? CourseFile { get; set; }
+        public string? FolderName { get; set; }
+        public string? CourseImage { get; set; }
+        public string[]? CourseFiles { get; set; }
 
         [Required(ErrorMessage = "Thời lượng là trường bắt buộc")]
         public string? Duration { get; set; }

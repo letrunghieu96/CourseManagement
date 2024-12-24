@@ -5,6 +5,9 @@
 @if (Model.Length > 0) foreach (var result in Model)
 {
     <tr>
+        <td>
+            <img alt="@result.CourseCode" class="img-md" src="@result.CourseImage" loading="lazy">
+        </td>
         <td>@result.CourseCode</td>
         <td>@result.CourseName</td>
         <td class="text-right">@result.Duration.ToString("#,###")</td>
@@ -33,6 +36,6 @@
 else
 {
     <tr>
-        <td class="error-message" colspan="9">@ErrorMessageHelper.NoDataFound</td>
+        <td class="error-message" colspan="10">@ErrorMessageHelper.NoDataFound</td>
     </tr>
 }

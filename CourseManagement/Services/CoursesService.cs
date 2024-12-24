@@ -11,19 +11,14 @@ namespace CourseManagement.Services
     public class CoursesService : ServiceBase
     {
         /// <summary>Upload file extensions</summary>
-        private readonly string[] _uploadImageExtensions;
-        private readonly string[] _uploadFileExtensions;
         private readonly string _uploadCoursesFolderPath;
 
         public CoursesService(IConfiguration config, IDomainFacade domainFacade) : base(config, domainFacade)
         {
-            _uploadImageExtensions = _config.GetValue<string>("UploadImageExtensions").Split(",");
-            _uploadFileExtensions = _config.GetValue<string>("UploadFileExtensions").Split(",");
-
 #if DEBUG
-            _uploadCoursesFolderPath = WebConstants.FOLDER_PATH_COURSES;
+            _uploadCoursesFolderPath = "Contents";
 #else
-            _uploadCoursesFolderPath = Path.Combine(_config.GetValue<string>("PhysicalPath"), WebConstants.FOLDER_PATH_COURSES);
+            _uploadCoursesFolderPath = Path.Combine(_config.GetValue<string>("PhysicalPath"), "Contents");
 #endif
         }
 
@@ -36,6 +31,7 @@ namespace CourseManagement.Services
 
             var total = _domainFacade.Courses.Count(condition);
             var searchResults = _domainFacade.Courses.Search(condition);
+            if (total > 0) searchResults.ToList().ForEach(result => result.CourseImage = GetImage(result.FolderName));
             var viewModel = new CourseListViewModel
             {
                 Condition = condition,
@@ -63,8 +59,10 @@ namespace CourseManagement.Services
 
             viewModel.CourseCode = model.CourseCode;
             viewModel.CourseName = model.CourseName;
-            viewModel.CourseImage = $"\\{GetImage(model.FilePath)}";
             viewModel.MainContent = model.MainContent;
+            viewModel.FolderName = model.FolderName;
+            viewModel.CourseImage = GetImage(model.FolderName);
+            viewModel.CourseFiles = GetFileNames(model.FolderName);
             viewModel.Duration = model.Duration.ToString("#,###");
             viewModel.StartDate = model.StartDate.ToString(WebConstants.DATE_FORMAT_VN);
             viewModel.EndDate = model.EndDate.ToString(WebConstants.DATE_FORMAT_VN);
@@ -92,13 +90,20 @@ namespace CourseManagement.Services
             return isExist;
         }
 
-        public async Task<bool> Create(CourseViewModel viewModel, string uniqueCourseId)
+        public bool CheckDateRange(string? startDate, string? endDate)
+        {
+            // Compare
+            var result = ConvertDate(endDate) >= ConvertDate(startDate);
+            return result;
+        }
+
+        public bool Create(CourseViewModel viewModel, string folderName)
         {
             var model = new CourseModel
             {
                 CourseCode = viewModel.CourseCode,
                 CourseName = viewModel.CourseName,
-                FilePath = Path.Combine(_uploadCoursesFolderPath, uniqueCourseId),
+                FolderName = folderName,
                 MainContent = viewModel.MainContent ?? string.Empty,
                 Duration = int.Parse(viewModel.Duration ?? "0", NumberStyles.AllowThousands),
                 StartDate = ConvertDate(viewModel.StartDate) ?? DateTime.Now,
@@ -109,7 +114,7 @@ namespace CourseManagement.Services
                 LastChanged = viewModel.LastChanged,
             };
             // Insert
-            var courseId = await _domainFacade.Courses.Insert(model);
+            var courseId = _domainFacade.Courses.Insert(model);
             if (courseId > 0)
             {
                 viewModel.CourseId = courseId;
@@ -121,7 +126,7 @@ namespace CourseManagement.Services
             return false;
         }
 
-        public async Task<bool> Update(CourseViewModel viewModel)
+        public bool Update(CourseViewModel viewModel)
         {
             var model = new CourseModel
             {
@@ -137,7 +142,7 @@ namespace CourseManagement.Services
                 LastChanged = viewModel.LastChanged,
             };
             // Update
-            var isSuccess = await _domainFacade.Courses.Update(viewModel.CourseId, model);
+            var isSuccess = _domainFacade.Courses.Update(viewModel.CourseId, model);
             if (isSuccess) _domainFacade.Commit();
 
             return isSuccess;
@@ -145,7 +150,12 @@ namespace CourseManagement.Services
 
         public bool Delete(int courseId)
         {
-            // Delete
+            // Delete file
+            var model = _domainFacade.Courses.Get(courseId);
+            var directoryPath = Path.Combine(_uploadCoursesFolderPath, model.FolderName);
+            DeleteDirectory(directoryPath);
+
+            // Delete course
             var isSuccess = _domainFacade.Courses.Delete(courseId);
             if (isSuccess) _domainFacade.Commit();
 
@@ -176,14 +186,14 @@ namespace CourseManagement.Services
             return isSuccess;
         }
 
-        public async Task<bool> UploadImage(string uniqueCourseId, IFormFile file)
+        public async Task<bool> UploadImage(string folderName, IFormFile file)
         {
             try
             {
                 if (file == null) return false;
 
                 // Check folder
-                var imageFolderPath = Path.Combine(_uploadCoursesFolderPath, uniqueCourseId, "Image");
+                var imageFolderPath = Path.Combine(_uploadCoursesFolderPath, folderName, "Image");
                 if (Directory.Exists(imageFolderPath)) DeleteDirectory(imageFolderPath);
                 Directory.CreateDirectory(imageFolderPath);
 
@@ -203,35 +213,33 @@ namespace CourseManagement.Services
             return false;
         }
 
-        public bool IsExistImage(string uniqueCourseId)
+        public bool IsExistImage(string folderName)
         {
-            var filePath = Path.Combine(_uploadCoursesFolderPath, uniqueCourseId, "Image");
+            var filePath = Path.Combine(_uploadCoursesFolderPath, folderName, "Image");
             if (!Directory.Exists(filePath)) return false;
 
             var files = Directory.GetFiles(filePath);
             return (files.Length > 0);
         }
 
-        public string GetImage(string filePath)
+        public string GetImage(string folderName)
         {
-            var fileImagePath = Path.Combine(filePath, "Image");
-            var file = Directory.GetFiles(fileImagePath).FirstOrDefault();
-            return file ?? string.Empty;
+            var fileName = string.Empty;
+            var fileImagePath = Path.Combine(_uploadCoursesFolderPath, folderName, "Image");
+            if (!Directory.Exists(fileImagePath)) return fileName;
+
+            foreach (var file in Directory.GetFiles(fileImagePath))
+            {
+                fileName = Path.GetFileName(file);
+                break;
+            }
+            return $"\\Contents\\{folderName}\\Image\\{fileName}" ?? string.Empty;
         }
 
-        public string GetImageUrl(string courseId, string courseImage)
+        public string GetImageUrl(string folderName, string courseImage)
         {
-            var filePath = Path.Combine(_uploadCoursesFolderPath, courseId, "Image", courseImage);
+            var filePath = $"\\Contents\\{folderName}\\Image\\{courseImage}";
             return filePath;
-        }
-
-        public string GetCourseFile(string courseId)
-        {
-            if (string.IsNullOrEmpty(courseId)) return string.Empty;
-
-            var filePath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files");
-            var files = Directory.GetFiles(filePath);
-            return (files.Length > 0) ? filePath : string.Empty;
         }
 
         public void DeleteDirectory(string directoryPath)
@@ -252,12 +260,12 @@ namespace CourseManagement.Services
             }
         }
 
-        public async Task<bool> UploadFiles(string courseId, IFormFile[]? files)
+        public async Task<bool> UploadFiles(string folderName, IFormFile[]? files)
         {
             try
             {
                 // Check folder
-                var filesFolderPath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files");
+                var filesFolderPath = Path.Combine(_uploadCoursesFolderPath, folderName, "Files");
                 if (!Directory.Exists(filesFolderPath)) Directory.CreateDirectory(filesFolderPath);
 
                 // Save files
@@ -280,10 +288,12 @@ namespace CourseManagement.Services
             return false;
         }
 
-        public string[] GetFileNames(string courseId)
+        public string[] GetFileNames(string folderName)
         {
             var fileNames = new List<string>();
-            var folderPath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files");
+            var folderPath = Path.Combine(_uploadCoursesFolderPath, folderName, "Files");
+            if (!Directory.Exists(folderPath)) return fileNames.ToArray();
+
             foreach (var file in Directory.GetFiles(folderPath))
             {
                 fileNames.Add(Path.GetFileName(file));
@@ -292,18 +302,18 @@ namespace CourseManagement.Services
             return fileNames.ToArray();
         }
 
-        public FileStream GetFile(string courseId, string fileName)
+        public FileStream GetFile(string folderName, string fileName)
         {
-            var filePath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files", fileName);
+            var filePath = Path.Combine(_uploadCoursesFolderPath, folderName, "Files", fileName);
             var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             return stream;
         }
 
-        public bool DeleteFile(string courseId, string fileName)
+        public bool DeleteFile(string folderName, string fileName)
         {
             try
             {
-                var filePath = Path.Combine(_uploadCoursesFolderPath, courseId, "Files", fileName);
+                var filePath = Path.Combine(_uploadCoursesFolderPath, folderName, "Files", fileName);
                 File.Delete(filePath);
 
                 return true;

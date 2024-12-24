@@ -1,4 +1,5 @@
-﻿using CourseManagement.Domain;
+﻿using CourseManagement;
+using CourseManagement.Domain;
 using CourseManagement.Middlewares;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Data.SqlClient;
@@ -11,8 +12,8 @@ using System.Data;
 public class Startup
 {
     #region +Fields
-    /// <summary>Configuration interface</summary>
-    public IConfiguration _configuration { get; }
+    private IConfiguration _configuration { get; }
+    private static string _coursesFolderPath = string.Empty;
     #endregion
 
     #region +Constructor
@@ -23,6 +24,11 @@ public class Startup
     public Startup(IConfiguration configuration)
     {
         _configuration = configuration;
+#if DEBUG
+        _coursesFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "Contents");
+#else
+        _coursesFolderPath = Path.Combine(_configuration.GetValue<string>("PhysicalPath"), "Contents");
+#endif
     }
     #endregion
 
@@ -89,11 +95,11 @@ public class Startup
         }
 
         app.UseHttpsRedirection();
-        app.UseStaticFiles();
 
+        app.UseStaticFiles();
         app.UseStaticFiles(new StaticFileOptions
         {
-            FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "Contents")),
+            FileProvider = new PhysicalFileProvider(_coursesFolderPath),
             RequestPath = "/Contents"
         });
 
@@ -109,6 +115,24 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
+            // Check and create the directory if it does not exist.
+            if (!Directory.Exists(_coursesFolderPath)) Directory.CreateDirectory(_coursesFolderPath);
+            endpoints.MapGet("/Contents/{fileName}", async context =>
+            {
+                var fileName = context.Request.RouteValues["fileName"]?.ToString();
+                var filePath = Path.Combine("Contents", fileName ?? string.Empty);
+                if (File.Exists(filePath))
+                {
+                    var image = await File.ReadAllBytesAsync(filePath);
+                    context.Response.ContentType = "application/octet-stream";
+                    await context.Response.Body.WriteAsync(image);
+                }
+                else
+                {
+                    context.Response.StatusCode = 404;
+                }
+            });
+
             endpoints.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Index}/{action=Index}/{id?}");

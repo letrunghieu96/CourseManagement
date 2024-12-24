@@ -51,27 +51,59 @@
                 </div>
                 <div class="row mb-2">
                     <div class="col-md-3">
-                        <label asp-for="CourseImage">Hình ảnh</label>
+                        <label asp-for="CourseImage" class="required">Hình ảnh</label>
                         <br />
-                        <div class="custom-file">
-                            <input type="file" accept="image/*" class="custom-file-input" onchange="uploadImage()" id="CourseImage">
-                            <label class="custom-file-label" for="CourseImage">Chọn hình ảnh</label>
-                        </div>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="custom-file">
+                                <input type="file" accept=".jpg,.jpeg,.png" class="custom-file-input" onchange="uploadImage()" id="CourseImage">
+                                <label class="custom-file-label" for="CourseImage">Chọn hình ảnh</label>
+                            </div>
+                        }
                         <div class="col-auto">
-                            <img id="imagePreview" class="img-lg mt-2" @(!string.IsNullOrEmpty(Model.CourseImage) ? $"src={Model.CourseImage}" : string.Empty)>
+                            @if (!string.IsNullOrEmpty(Model.CourseImage))
+                            {
+                                <img id="imagePreview" class="img-lg mt-2" src="@(Model.CourseImage)">
+                            }
+                            else
+                            {
+                                <img id="imagePreview" class="img-lg mt-2">
+                            }
                         </div>
                         <div class="col d-flex align-items-center">
                             <p id="imageInfo" class="col d-flex align-items-center"></p>
                         </div>
                     </div>
                     <div class="col-md-9">
-                        <label asp-for="CourseFile">File đính kèm</label>
+                        <label asp-for="CourseFiles">File đính kèm</label>
                         <br />
-                        <div class="custom-file">
-                            <input type="file" multiple accept="*" class="custom-file-input" onchange="uploadFiles()" id="CourseFile">
-                            <label class="custom-file-label" for="CourseFile">Chọn file</label>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="custom-file">
+                                <input type="file" multiple accept=".txt,.csv,.xlsx,.pdf,.json,.xml,.html,.docx,.doc,.pptx,.ppt,.jpg,.jpeg,.png" class="custom-file-input" onchange="uploadFiles()" id="CourseFiles">
+                                <label class="custom-file-label" for="CourseFile">Chọn file</label>
+                            </div>
+                        }
+                        <div id="fileList">
+                            @if (Model.CourseFiles != null) foreach (var file in Model.CourseFiles)
+                            {
+                                if (User.IsInRole("Admin") || Model.CanCancel)
+                                {
+                                    <a class="btn btn-link" onclick="downloadFile('@Model.FolderName', '@file')">@file</a>
+                                }
+                                else
+                                {
+                                    <span>@file</span>
+                                }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a class="btn btn-danger btn-sm" onclick="deleteFile('@Model.FolderName', '@file')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                }
+                                <br />
+                            }
                         </div>
-                        <div id="fileList"></div>
                     </div>
                 </div>
 

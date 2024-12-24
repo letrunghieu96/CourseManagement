@@ -2,7 +2,13 @@
 function uploadImage() {
     var formData = new FormData();
     var fileInput = $("#CourseImage")[0].files[0];
-    if (fileInput) formData.append("file", fileInput);
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+    if (fileInput && fileInput.size > maxFileSize) {
+        $("#CourseImage").val("");
+        alert('Dung lượng file vượt quá giới hạn cho phép (10MB)');
+        return;
+    }
+    formData.append("file", fileInput);
 
     $.ajax({
         type: "POST",
@@ -29,21 +35,21 @@ function uploadImage() {
 }
 
 // Download file
-function downloadFile(courseId, fileName) {
+function downloadFile(folderName, fileName) {
     const link = document.createElement("a");
-    link.href = `/Courses/DownloadFile?courseId=${courseId}&fileName=${encodeURIComponent(fileName)}`;
+    link.href = `/Courses/DownloadFile?folderName=${folderName}&fileName=${encodeURIComponent(fileName)}`;
     link.download = fileName;
     link.click();
 }
 
 // Delete file
-function deleteFile(courseId, fileName) {
+function deleteFile(folderName, fileName) {
     var isOK = confirm(`Bạn có chắc chắn muốn xóa ${fileName}?`);
     if (isOK === false) return;
 
     $.ajax({
         type: "DELETE",
-        url: `/Courses/DeleteFile?courseId=${courseId}&fileName=${encodeURIComponent(fileName)}`,
+        url: `/Courses/DeleteFile?folderName=${folderName}&fileName=${encodeURIComponent(fileName)}`,
         success: function (result) {
             if (result.isSuccess === false) {
                 alert('thất bại');
@@ -53,8 +59,8 @@ function deleteFile(courseId, fileName) {
             if (result.isSuccess) {
                 var fileList = '';
                 for (var index = 0; index < result.fileNames.length; index++) {
-                    const tagA = `<a class="btn btn-link" onclick="downloadFile('${result.courseId}', '${result.fileNames[index]}')">${result.fileNames[index]}</a>`;
-                    const tagButton = `<a class="btn btn-danger btn-sm" onclick="deleteFile('${result.courseId}', '${result.fileNames[index]}')"><i class="fas fa-trash"></i></a>`;
+                    const tagA = `<a class="btn btn-link" onclick="downloadFile('${result.folderName}', '${result.fileNames[index]}')">${result.fileNames[index]}</a>`;
+                    const tagButton = `<a class="btn btn-danger btn-sm" onclick="deleteFile('${result.folderName}', '${result.fileNames[index]}')"><i class="fas fa-trash"></i></a>`;
                     fileList += tagA + tagButton + '</br>';
                 }
 
@@ -71,13 +77,34 @@ function deleteFile(courseId, fileName) {
 // Upload files
 function uploadFiles() {
     var formData = new FormData();
-    var fileInputs = $("#CourseFile")[0].files;
+    var fileInputs = $("#CourseFiles")[0].files;
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+    const maxFiles = 5; // 5 file
 
+    if (fileInputs.length > maxFiles) {
+        $("#CourseFiles").val("");
+        alert(`Chỉ được upload tối đa ${maxFiles} file.`);
+        return;
+    }
+
+    let errorMessage = "";
     if (fileInputs.length > 0) {
         for (var index = 0; index < fileInputs.length; index++) {
+
+            if (fileInputs[index].size > maxFileSize) {
+                errorMessage += `\nFile "${fileInputs[index].name}" vượt quá giới hạn dung lượng (10MB).`;
+                continue;
+            }
+
             formData.append("files", fileInputs[index]);
         }
-    } 
+    }
+
+    if (errorMessage) {
+        $("#CourseFiles").val("");
+        alert(errorMessage);
+        return;
+    }
 
     $.ajax({
         type: "POST",
@@ -94,8 +121,8 @@ function uploadFiles() {
             if (result.isSuccess) {
                 var fileList = '';
                 for (var index = 0; index < result.fileNames.length; index++) {
-                    const tagA = `<a class="btn btn-link" onclick="downloadFile('${result.courseId}', '${result.fileNames[index]}')">${result.fileNames[index]}</a>`;
-                    const tagButton = `<a class="btn btn-danger btn-sm" onclick="deleteFile('${result.courseId}', '${result.fileNames[index]}')"><i class="fas fa-trash"></i></a>`;
+                    const tagA = `<a class="btn btn-link" onclick="downloadFile('${result.folderName}', '${result.fileNames[index]}')">${result.fileNames[index]}</a>`;
+                    const tagButton = `<a class="btn btn-danger btn-sm" onclick="deleteFile('${result.folderName}', '${result.fileNames[index]}')"><i class="fas fa-trash"></i></a>`;
                     fileList += tagA + tagButton + '</br>';
                 }
 
